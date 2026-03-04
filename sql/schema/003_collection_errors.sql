@@ -8,6 +8,7 @@ CREATE TABLE collection_errors (
 	type error_type NOT NULL,
 	error_message TEXT NOT NULL,
 	retries INTEGER NOT NULL,
+	raw_response JSONB,
 	CONSTRAINT fk_deviceid FOREIGN KEY (device_id) REFERENCES devices(id),
 	PRIMARY KEY (requested_at, device_id, metric_name)
 );
