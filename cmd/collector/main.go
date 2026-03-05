@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/scottyloveless/dashcam/internal/database"
@@ -20,10 +20,11 @@ type config struct {
 }
 
 type application struct {
-	config  config
-	logger  *slog.Logger
-	dbpool  *pgxpool.Pool
-	queries *database.Queries
+	config    config
+	logger    *slog.Logger
+	dbpool    *pgxpool.Pool
+	queries   *database.Queries
+	protocols []Trigger
 }
 
 func main() {
@@ -59,59 +60,39 @@ func main() {
 	queries := database.New(pool)
 
 	app := application{
-		config:  cfg,
-		logger:  logger,
-		dbpool:  pool,
-		queries: queries,
+		config:    cfg,
+		logger:    logger,
+		dbpool:    pool,
+		queries:   queries,
+		protocols: []Trigger{},
 	}
+
 	for {
-		requestedTime := time.Now()
-		stats := app.sendPing()
-		receivedTime := time.Now()
-
-		statsPayload := database.WritePingParams{
-			MetricName: "packet_loss",
-			Value:      stats.PacketLoss,
-			RequestedAt: pgtype.Timestamptz{
-				Time:             requestedTime,
-				InfinityModifier: 0,
-				Valid:            true,
-			},
-			ReceivedAt: pgtype.Timestamptz{
-				Time:             receivedTime,
-				InfinityModifier: 0,
-				Valid:            true,
-			},
-		}
-
-		statsPayload2 := database.WritePingParams{
-			MetricName: "rtt_avg",
-			Value:      float64(stats.AvgRtt),
-			RequestedAt: pgtype.Timestamptz{
-				Time:             requestedTime,
-				InfinityModifier: 0,
-				Valid:            true,
-			},
-			ReceivedAt: pgtype.Timestamptz{
-				Time:             receivedTime,
-				InfinityModifier: 0,
-				Valid:            true,
-			},
-		}
-
-		err = app.queries.WritePing(context.Background(), statsPayload)
+		fmt.Println("starting collector cycle...")
+		app.protocols, err = app.triggerNetworkHelper()
 		if err != nil {
-			app.logger.Error(err.Error())
+			logger.Error(err.Error())
 			os.Exit(1)
 		}
 
-		err = app.queries.WritePing(context.Background(), statsPayload2)
-		if err != nil {
-			app.logger.Error(err.Error())
-			os.Exit(1)
+		if len(app.protocols) <= 0 {
+			time.Sleep(10 * time.Second)
+			continue
 		}
-		app.logger.Info("successfully wrote to database")
-		app.logger.Info("waiting 10 seconds")
+
+		for _, protocol := range app.protocols {
+			if !protocol.Trigger.Enabled {
+				continue
+			}
+
+			go func() {
+				if err = app.collectPing(protocol); err != nil {
+					app.logger.Error(err.Error())
+					return
+				}
+				fmt.Println("ping collected from " + protocol.IP.String())
+			}()
+		}
 		time.Sleep(10 * time.Second)
 	}
 }
