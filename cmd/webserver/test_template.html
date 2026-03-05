@@ -9,7 +9,7 @@
     <h2>Devices</h2>
     <ul>
         {{range .}}
-			<li>{{.Device.Nickname}}: {{.Device.IpAddress}} {{.RTTavg}} {{.PacketLoss}}</li>
+			<li>{{.Device.Nickname}} - {{.RTTavg}}ms - {{.PacketLoss}}%</li>
         {{end}}
     </ul>
 </body>
