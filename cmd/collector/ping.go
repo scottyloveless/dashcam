@@ -30,6 +30,7 @@ func (app *application) collectPing(trigger Trigger) error {
 	statsPayload := database.WritePingParams{
 		MetricName: "packet_loss",
 		Value:      stats.PacketLoss / 100,
+		DeviceID:   trigger.Trigger.DeviceID,
 		RequestedAt: pgtype.Timestamptz{
 			Time:             requestedTime,
 			InfinityModifier: 0,
@@ -45,6 +46,7 @@ func (app *application) collectPing(trigger Trigger) error {
 	statsPayload2 := database.WritePingParams{
 		MetricName: "rtt_avg",
 		Value:      float64(stats.AvgRtt.Milliseconds()),
+		DeviceID:   trigger.Trigger.DeviceID,
 		RequestedAt: pgtype.Timestamptz{
 			Time:             requestedTime,
 			InfinityModifier: 0,

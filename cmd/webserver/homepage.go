@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -9,13 +10,9 @@ import (
 )
 
 type deviceAndPing struct {
-	Device database.Device	
-	Ping PingPair
-}
-
-type PingPair struct {
-	RttAvg float64
+	Device     database.Device
 	PacketLoss float64
+	RTTavg     float64
 }
 
 func (app *application) homepageHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,14 +22,32 @@ func (app *application) homepageHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.queries.GetPingByDeviceID(context.Background(), device.)
+	var dp []deviceAndPing
 
-	tpl, err := template.ParseFiles("cmd/server/test_template.html")
+	for _, device := range devices {
+		pl, err := app.queries.GetPacketLossByDeviceID(context.Background(), device.ID)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		rtt, err := app.queries.GetRttAvgByDeviceID(context.Background(), device.ID)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		dap := deviceAndPing{
+			Device:     device,
+			PacketLoss: pl.Value,
+			RTTavg:     rtt.Value,
+		}
+
+		dp = append(dp, dap)
+	}
+
+	tpl, err := template.ParseFiles("cmd/webserver/test_template.html")
 	if err != nil {
 		app.logger.Error(err.Error())
 		return
 	}
-	err = tpl.Execute(w, devices)
+	err = tpl.Execute(w, dp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

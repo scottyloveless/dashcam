@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"math/rand/v2"
 	"os"
 	"time"
 
@@ -86,6 +87,9 @@ func main() {
 			}
 
 			go func() {
+				n := rand.IntN(10)
+
+				time.Sleep(time.Duration(n) * time.Millisecond)
 				if err = app.collectPing(protocol); err != nil {
 					app.logger.Error(err.Error())
 					return
@@ -93,6 +97,6 @@ func main() {
 				fmt.Println("ping collected from " + protocol.IP.String())
 			}()
 		}
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }

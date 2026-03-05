@@ -14,7 +14,7 @@ import (
 const getPacketLossByDeviceID = `-- name: GetPacketLossByDeviceID :one
 SELECT metric_name, value, device_id, requested_at, received_at
 FROM metrics
-WHERE device_id = $1 AND name = 'packet_loss'
+WHERE device_id = $1 AND metric_name = 'packet_loss'
 ORDER BY requested_at DESC
 LIMIT 1
 `
@@ -35,7 +35,7 @@ func (q *Queries) GetPacketLossByDeviceID(ctx context.Context, deviceID pgtype.U
 const getRttAvgByDeviceID = `-- name: GetRttAvgByDeviceID :one
 SELECT metric_name, value, device_id, requested_at, received_at
 FROM metrics
-WHERE device_id = $1 AND name = 'rtt_avg'
+WHERE device_id = $1 AND metric_name = 'rtt_avg'
 ORDER BY requested_at DESC
 LIMIT 1
 `
