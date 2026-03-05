@@ -10,6 +10,7 @@ import (
 )
 
 func (app *application) collectPing(trigger Trigger) error {
+	ctx := context.Background()
 	pinger, err := probing.NewPinger(trigger.IP.String())
 	if err != nil {
 		app.logger.Error(err.Error())
@@ -59,13 +60,13 @@ func (app *application) collectPing(trigger Trigger) error {
 		},
 	}
 
-	err = app.queries.WritePing(context.Background(), statsPayload)
+	err = app.queries.WritePing(ctx, statsPayload)
 	if err != nil {
 		app.logger.Error(err.Error())
 		return err
 	}
 
-	err = app.queries.WritePing(context.Background(), statsPayload2)
+	err = app.queries.WritePing(ctx, statsPayload2)
 	if err != nil {
 		app.logger.Error(err.Error())
 		return err

@@ -13,7 +13,8 @@ type Trigger struct {
 }
 
 func (app *application) triggerNetworkHelper() ([]Trigger, error) {
-	dp, err := app.queries.GetProtocolsDevices(context.Background())
+	ctx := context.Background()
+	dp, err := app.queries.GetProtocolsDevices(ctx)
 	if err != nil {
 		app.logger.Error(err.Error())
 		return nil, err
@@ -23,7 +24,7 @@ func (app *application) triggerNetworkHelper() ([]Trigger, error) {
 	var triggerSlice []Trigger
 
 	for _, protocol := range dp {
-		ip, err := app.queries.GetIPfromDeviceID(context.Background(), protocol.DeviceID)
+		ip, err := app.queries.GetIPfromDeviceID(ctx, protocol.DeviceID)
 		if err != nil {
 			app.logger.Error(err.Error())
 			return nil, err

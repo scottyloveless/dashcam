@@ -16,6 +16,7 @@ type deviceAndPing struct {
 }
 
 func (app *application) homepageHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 	devices, err := app.queries.GetDevices(r.Context())
 	if err != nil {
 		app.logger.Error(err.Error())
@@ -25,11 +26,11 @@ func (app *application) homepageHandler(w http.ResponseWriter, r *http.Request) 
 	var dp []deviceAndPing
 
 	for _, device := range devices {
-		pl, err := app.queries.GetPacketLossByDeviceID(context.Background(), device.ID)
+		pl, err := app.queries.GetPacketLossByDeviceID(ctx, device.ID)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		rtt, err := app.queries.GetRttAvgByDeviceID(context.Background(), device.ID)
+		rtt, err := app.queries.GetRttAvgByDeviceID(ctx, device.ID)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
