@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"math/rand/v2"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -68,35 +69,41 @@ func main() {
 		protocols: []Trigger{},
 	}
 
-	for {
-		fmt.Println("starting collector cycle...")
-		app.protocols, err = app.triggerNetworkHelper()
-		if err != nil {
-			logger.Error(err.Error())
-			os.Exit(1)
-		}
+	fmt.Println("starting collector cycle...")
+	app.protocols, err = app.triggerNetworkHelper()
+	if err != nil {
+		logger.Error(err.Error())
+		time.Sleep(10 * time.Second)
+		return
+	}
 
-		if len(app.protocols) <= 0 {
-			time.Sleep(10 * time.Second)
+	if len(app.protocols) <= 0 {
+		time.Sleep(10 * time.Second)
+		return
+	}
+
+	for _, protocol := range app.protocols {
+		if !protocol.Trigger.Enabled {
 			continue
 		}
 
-		for _, protocol := range app.protocols {
-			if !protocol.Trigger.Enabled {
-				continue
-			}
+		go func(p Trigger) {
+			pollingRate := p.Trigger.PollingRate.Microseconds
+			fmt.Println(pollingRate)
 
-			go func() {
-				n := rand.IntN(10)
+			ticker := time.NewTicker(time.Duration(pollingRate) * time.Microsecond)
+			defer ticker.Stop()
 
-				time.Sleep(time.Duration(n) * time.Millisecond)
-				if err = app.collectPing(protocol); err != nil {
+			for range ticker.C {
+				time.Sleep(time.Duration(rand.IntN(20)) * time.Millisecond)
+
+				if err = app.collectPing(p); err != nil {
 					app.logger.Error(err.Error())
-					return
+					continue
 				}
-				fmt.Println("ping collected from " + protocol.IP.String())
-			}()
-		}
-		time.Sleep(5 * time.Second)
+				fmt.Println("ping collected from " + p.IP.String() + ". poll rate: " + strconv.Itoa(int(p.Trigger.PollingRate.Microseconds/1000000)) + " seconds")
+			}
+		}(protocol)
 	}
+	select {}
 }

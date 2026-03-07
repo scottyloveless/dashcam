@@ -19,15 +19,27 @@ VALUES (
 	$3,
 	$4,
 	$5
-	)
+	),
+	(
+	$6,
+	$7,
+	$8,
+	$9,
+	$10
+)
 `
 
 type WritePingParams struct {
-	MetricName  string
-	Value       float64
-	DeviceID    pgtype.UUID
-	RequestedAt pgtype.Timestamptz
-	ReceivedAt  pgtype.Timestamptz
+	MetricName    string
+	Value         float64
+	DeviceID      pgtype.UUID
+	RequestedAt   pgtype.Timestamptz
+	ReceivedAt    pgtype.Timestamptz
+	MetricName_2  string
+	Value_2       float64
+	DeviceID_2    pgtype.UUID
+	RequestedAt_2 pgtype.Timestamptz
+	ReceivedAt_2  pgtype.Timestamptz
 }
 
 func (q *Queries) WritePing(ctx context.Context, arg WritePingParams) error {
@@ -37,6 +49,11 @@ func (q *Queries) WritePing(ctx context.Context, arg WritePingParams) error {
 		arg.DeviceID,
 		arg.RequestedAt,
 		arg.ReceivedAt,
+		arg.MetricName_2,
+		arg.Value_2,
+		arg.DeviceID_2,
+		arg.RequestedAt_2,
+		arg.ReceivedAt_2,
 	)
 	return err
 }

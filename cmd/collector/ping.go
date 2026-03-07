@@ -18,9 +18,13 @@ func (app *application) collectPing(trigger Trigger) error {
 	}
 
 	pinger.Count = 5
+
 	requestedTime := time.Now()
+
 	err = pinger.Run()
+
 	receivedTime := time.Now()
+
 	if err != nil {
 		app.logger.Error(err.Error())
 		return err
@@ -42,18 +46,15 @@ func (app *application) collectPing(trigger Trigger) error {
 			InfinityModifier: 0,
 			Valid:            true,
 		},
-	}
-
-	statsPayload2 := database.WritePingParams{
-		MetricName: "rtt_avg",
-		Value:      float64(stats.AvgRtt.Milliseconds()),
-		DeviceID:   trigger.Trigger.DeviceID,
-		RequestedAt: pgtype.Timestamptz{
+		MetricName_2: "rtt_avg",
+		Value_2:      float64(stats.AvgRtt.Milliseconds()),
+		DeviceID_2:   trigger.Trigger.DeviceID,
+		RequestedAt_2: pgtype.Timestamptz{
 			Time:             requestedTime,
 			InfinityModifier: 0,
 			Valid:            true,
 		},
-		ReceivedAt: pgtype.Timestamptz{
+		ReceivedAt_2: pgtype.Timestamptz{
 			Time:             receivedTime,
 			InfinityModifier: 0,
 			Valid:            true,
@@ -61,12 +62,6 @@ func (app *application) collectPing(trigger Trigger) error {
 	}
 
 	err = app.queries.WritePing(ctx, statsPayload)
-	if err != nil {
-		app.logger.Error(err.Error())
-		return err
-	}
-
-	err = app.queries.WritePing(ctx, statsPayload2)
 	if err != nil {
 		app.logger.Error(err.Error())
 		return err
