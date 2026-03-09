@@ -1,15 +1,14 @@
 .grid-container {
     display: grid;
-    /* Creates 4 columns of equal width */
     grid-template-columns: repeat(3, 1fr); 
-    gap: 10px; /* Adds space between the columns */
-}
+    gap: 10px;}
 
 .column-item {
     padding: 15px;
     border: 1px solid #ccc;
 	border-radius: 15px;
-    /* Add any other styling you need */
+	font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace;
+	font-size: 12px;
 }
 
 .device-grid {
@@ -19,8 +18,18 @@
 }
 
 .list-item {
-    padding: 5px;
-    /* Add any other styling you need */
+    padding: 3px;
 }
 
+body {
+	font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace;
+}
 
+html {	
+	color: #c8d3f5;
+	background-color: #222436;
+}
+
+h4 {
+	color: #86e1fc;
+}

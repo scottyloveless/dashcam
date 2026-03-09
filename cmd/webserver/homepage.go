@@ -34,6 +34,7 @@ func (app *application) homepageHandler(w http.ResponseWriter, r *http.Request) 
 		if err != nil {
 			fmt.Println(err.Error())
 		}
+
 		dap := deviceAndPing{
 			Device:     device,
 			PacketLoss: pl.Value,

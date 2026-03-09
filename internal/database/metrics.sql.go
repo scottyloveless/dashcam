@@ -11,6 +11,41 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getAllMetricsForOneDeviceByID = `-- name: GetAllMetricsForOneDeviceByID :many
+SELECT metric_name, value, device_id, requested_at, received_at
+FROM metrics
+WHERE device_id = $1
+AND requested_at > NOW() - INTERVAL '12 hours'
+GROUP BY metric_name
+ORDER BY requested_at DESC
+`
+
+func (q *Queries) GetAllMetricsForOneDeviceByID(ctx context.Context, deviceID pgtype.UUID) ([]Metric, error) {
+	rows, err := q.db.Query(ctx, getAllMetricsForOneDeviceByID, deviceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Metric
+	for rows.Next() {
+		var i Metric
+		if err := rows.Scan(
+			&i.MetricName,
+			&i.Value,
+			&i.DeviceID,
+			&i.RequestedAt,
+			&i.ReceivedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPacketLossByDeviceID = `-- name: GetPacketLossByDeviceID :one
 SELECT metric_name, value, device_id, requested_at, received_at
 FROM metrics

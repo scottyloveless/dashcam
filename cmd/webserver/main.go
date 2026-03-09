@@ -23,10 +23,11 @@ type config struct {
 }
 
 type application struct {
-	config  config
-	logger  *slog.Logger
-	dbpool  *pgxpool.Pool
-	queries *database.Queries
+	config       config
+	logger       *slog.Logger
+	dbpool       *pgxpool.Pool
+	queries      *database.Queries
+	activeDevice database.Device
 }
 
 func main() {

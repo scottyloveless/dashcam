@@ -7,6 +7,8 @@ package database
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getDevices = `-- name: GetDevices :many
@@ -49,4 +51,33 @@ func (q *Queries) GetDevices(ctx context.Context) ([]Device, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getOneDeviceInfo = `-- name: GetOneDeviceInfo :one
+SELECT id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags FROM devices WHERE id = $1
+`
+
+func (q *Queries) GetOneDeviceInfo(ctx context.Context, id pgtype.UUID) (Device, error) {
+	row := q.db.QueryRow(ctx, getOneDeviceInfo, id)
+	var i Device
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Nickname,
+		&i.Hostname,
+		&i.IpAddress,
+		&i.LastSeenAt,
+		&i.Enabled,
+		&i.PollingInterval,
+		&i.Serial,
+		&i.Manufacturer,
+		&i.Model,
+		&i.Location,
+		&i.Room,
+		&i.Type,
+		&i.Os,
+		&i.Notes,
+		&i.Tags,
+	)
+	return i, err
 }
