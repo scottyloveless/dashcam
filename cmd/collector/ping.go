@@ -18,6 +18,7 @@ func (app *application) collectPing(trigger Trigger) error {
 	}
 
 	pinger.Count = 4
+	pinger.Timeout = 1 * time.Second
 
 	requestedTime := time.Now()
 
@@ -34,7 +35,7 @@ func (app *application) collectPing(trigger Trigger) error {
 
 	statsPayload := database.WritePingParams{
 		MetricName: "packet_loss",
-		Value:      stats.PacketLoss / 100,
+		Value:      stats.PacketLoss,
 		DeviceID:   trigger.Trigger.DeviceID,
 		RequestedAt: pgtype.Timestamptz{
 			Time:             requestedTime,
@@ -66,5 +67,11 @@ func (app *application) collectPing(trigger Trigger) error {
 		app.logger.Error(err.Error())
 		return err
 	}
+
+	if pinger.PacketsRecv == 0 {
+		app.logger.Info(trigger.IP.String() + " is unresponsive")
+	}
+	app.logger.Info("ping collected from " + trigger.IP.String())
+
 	return nil
 }

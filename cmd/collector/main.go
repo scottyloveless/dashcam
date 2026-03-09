@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"math/rand/v2"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -89,7 +88,6 @@ func main() {
 
 		go func(p Trigger) {
 			pollingRate := p.Trigger.PollingRate.Microseconds
-			fmt.Println(pollingRate)
 
 			ticker := time.NewTicker(time.Duration(pollingRate) * time.Microsecond)
 			defer ticker.Stop()
@@ -101,7 +99,6 @@ func main() {
 					app.logger.Error(err.Error())
 					continue
 				}
-				fmt.Println("ping collected from " + p.IP.String() + ". poll rate: " + strconv.Itoa(int(p.Trigger.PollingRate.Microseconds/1000000)) + " seconds")
 			}
 		}(protocol)
 	}
