@@ -1,34 +1,47 @@
 package main
 
-//
-// import (
-// 	"fmt"
-// 	"net/http"
-// )
-//
-// // type Location struct {
-// // 	latitude  float32
-// // 	longitude float32
-// // }
-//
-// // type Node struct {
-// // 	ipaddress   netip.Addr
-// // 	location    Location
-// // 	class       string
-// // 	snmp        bool
-// // 	snmpversion int
-// // }
-//
-// func (app *application) createNodeHandler(w http.ResponseWriter, r *http.Request) {
-// 	fmt.Fprintln(w, "create a new node")
-// }
-//
-// func (app *application) showNodeHandler(w http.ResponseWriter, r *http.Request) {
-// 	id, err := app.readIDParam(r)
-// 	if err != nil {
-// 		http.NotFound(w, r)
-// 		return
-// 	}
-//
-// 	fmt.Fprintf(w, "show the details of node %d\n", id)
-// }
+import (
+	"context"
+	"fmt"
+	"html/template"
+	"net/http"
+)
+
+func (app *application) devicePartialHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	devices, err := app.queries.GetDevices(r.Context())
+	if err != nil {
+		app.logger.Error(err.Error())
+		return
+	}
+
+	var dp []deviceAndPing
+
+	for _, device := range devices {
+		pl, err := app.queries.GetPacketLossByDeviceID(ctx, device.ID)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		rtt, err := app.queries.GetRttAvgByDeviceID(ctx, device.ID)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		dap := deviceAndPing{
+			Device:     device,
+			PacketLoss: pl.Value,
+			RTTavg:     rtt.Value,
+		}
+
+		dp = append(dp, dap)
+	}
+
+	tpl, err := template.ParseFiles("cmd/webserver/partials/device_partial.html")
+	if err != nil {
+		app.logger.Error(err.Error())
+		return
+	}
+	err = tpl.Execute(w, dp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

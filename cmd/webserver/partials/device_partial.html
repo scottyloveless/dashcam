@@ -1,0 +1,8 @@
+<div><h3>Column 1</h3></div>
+<div class="device-grid">
+	{{range .}}
+		<div class="list-item">{{.Device.Nickname}}</div>
+		<div class="list-item">{{.PacketLoss}}%</div>
+		<div class="list-item">{{.RTTavg}}ms</div>
+    {{end}}
+</div>

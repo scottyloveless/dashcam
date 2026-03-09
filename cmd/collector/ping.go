@@ -17,7 +17,7 @@ func (app *application) collectPing(trigger Trigger) error {
 		return err
 	}
 
-	pinger.Count = 5
+	pinger.Count = 4
 
 	requestedTime := time.Now()
 

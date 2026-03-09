@@ -1,0 +1,26 @@
+.grid-container {
+    display: grid;
+    /* Creates 4 columns of equal width */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 10px; /* Adds space between the columns */
+}
+
+.column-item {
+    padding: 15px;
+    border: 1px solid #ccc;
+	border-radius: 15px;
+    /* Add any other styling you need */
+}
+
+.device-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 2px;
+}
+
+.list-item {
+    padding: 5px;
+    /* Add any other styling you need */
+}
+
+

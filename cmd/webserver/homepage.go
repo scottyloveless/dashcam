@@ -43,7 +43,7 @@ func (app *application) homepageHandler(w http.ResponseWriter, r *http.Request) 
 		dp = append(dp, dap)
 	}
 
-	tpl, err := template.ParseFiles("cmd/webserver/test_template.html")
+	tpl, err := template.ParseFiles("cmd/webserver/templates/test_template.html")
 	if err != nil {
 		app.logger.Error(err.Error())
 		return

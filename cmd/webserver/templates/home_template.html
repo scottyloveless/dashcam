@@ -1,0 +1,10 @@
+<div class="container">
+<aside class="leftcolumn" id="leftcolumn">
+		<h2>HQ</h2>
+		<ul>
+        {{range .}}
+			<li>{{.Device.Nickname}} - {{.RTTavg}}ms - {{.PacketLoss}}%</li>
+        {{end}}
+    </ul>
+	</aside>
+</div>

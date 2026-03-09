@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"net/netip"
 
 	"github.com/scottyloveless/dashcam/internal/database"
@@ -19,7 +20,10 @@ func (app *application) triggerNetworkHelper() ([]Trigger, error) {
 		app.logger.Error(err.Error())
 		return nil, err
 	}
-	// TODO: do I need to check for zero size slice here?
+	if len(dp) == 0 {
+		app.logger.Error("no triggers found")
+		return nil, errors.New("no triggers found")
+	}
 
 	var triggerSlice []Trigger
 
