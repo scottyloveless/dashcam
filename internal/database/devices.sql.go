@@ -53,6 +53,72 @@ func (q *Queries) GetDevices(ctx context.Context) ([]Device, error) {
 	return items, nil
 }
 
+const getDevicesOneLocation = `-- name: GetDevicesOneLocation :many
+SELECT id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags FROM devices WHERE location = $1
+`
+
+func (q *Queries) GetDevicesOneLocation(ctx context.Context, location string) ([]Device, error) {
+	rows, err := q.db.Query(ctx, getDevicesOneLocation, location)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Device
+	for rows.Next() {
+		var i Device
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.Nickname,
+			&i.Hostname,
+			&i.IpAddress,
+			&i.LastSeenAt,
+			&i.Enabled,
+			&i.PollingInterval,
+			&i.Serial,
+			&i.Manufacturer,
+			&i.Model,
+			&i.Location,
+			&i.Room,
+			&i.Type,
+			&i.Os,
+			&i.Notes,
+			&i.Tags,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDistinctLocations = `-- name: GetDistinctLocations :many
+SELECT DISTINCT location FROM devices
+`
+
+func (q *Queries) GetDistinctLocations(ctx context.Context) ([]string, error) {
+	rows, err := q.db.Query(ctx, getDistinctLocations)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var location string
+		if err := rows.Scan(&location); err != nil {
+			return nil, err
+		}
+		items = append(items, location)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getOneDeviceInfo = `-- name: GetOneDeviceInfo :one
 SELECT id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags FROM devices WHERE id = $1
 `

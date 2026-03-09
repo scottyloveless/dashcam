@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"html/template"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -38,13 +37,7 @@ func (app *application) devicePageHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	tpl, err := template.ParseFiles("cmd/webserver/templates/device_template.html")
-	if err != nil {
-		app.logger.Error(err.Error())
-		return
-	}
-
-	if err = tpl.Execute(w, metrics); err != nil {
+	if err = app.templates["deviceInfo"].Execute(w, metrics); err != nil {
 		app.logger.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

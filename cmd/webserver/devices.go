@@ -3,19 +3,21 @@ package main
 import (
 	"context"
 	"fmt"
-	"html/template"
 	"net/http"
 )
 
 func (app *application) devicePartialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	devices, err := app.queries.GetDevices(r.Context())
+
+	query := r.URL.Query().Get("location")
+
+	devices, err := app.queries.GetDevicesOneLocation(r.Context(), query)
 	if err != nil {
 		app.logger.Error(err.Error())
 		return
 	}
 
-	var dp []deviceAndPing
+	var dp []devicePingAndLocation
 
 	for _, device := range devices {
 		pl, err := app.queries.GetPacketLossByDeviceID(ctx, device.ID)
@@ -26,21 +28,17 @@ func (app *application) devicePartialHandler(w http.ResponseWriter, r *http.Requ
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		dap := deviceAndPing{
+		dap := devicePingAndLocation{
 			Device:     device,
 			PacketLoss: pl.Value,
 			RTTavg:     rtt.Value,
+			Location:   device.Location,
 		}
 
 		dp = append(dp, dap)
 	}
 
-	tpl, err := template.ParseFiles("cmd/webserver/partials/device_partial.html")
-	if err != nil {
-		app.logger.Error(err.Error())
-		return
-	}
-	err = tpl.Execute(w, dp)
+	err = app.templates["devicePartial"].Execute(w, dp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

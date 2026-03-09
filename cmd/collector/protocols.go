@@ -11,6 +11,7 @@ import (
 type Trigger struct {
 	Trigger database.DevicesProtocol
 	IP      netip.Addr
+	Type    string
 }
 
 func (app *application) triggerNetworkHelper() ([]Trigger, error) {
@@ -28,12 +29,12 @@ func (app *application) triggerNetworkHelper() ([]Trigger, error) {
 	var triggerSlice []Trigger
 
 	for _, protocol := range dp {
-		ip, err := app.queries.GetIPfromDeviceID(ctx, protocol.DeviceID)
+		dev, err := app.queries.GetIPandTypefromDeviceID(ctx, protocol.DeviceID)
 		if err != nil {
 			app.logger.Error(err.Error())
 			return nil, err
 		}
-		triggerSlice = append(triggerSlice, Trigger{Trigger: protocol, IP: ip})
+		triggerSlice = append(triggerSlice, Trigger{Trigger: protocol, IP: dev.IpAddress, Type: dev.Type})
 	}
 
 	return triggerSlice, nil

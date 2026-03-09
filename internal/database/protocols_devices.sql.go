@@ -12,6 +12,22 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getIPandTypefromDeviceID = `-- name: GetIPandTypefromDeviceID :one
+SELECT ip_address, type FROM devices WHERE id = $1
+`
+
+type GetIPandTypefromDeviceIDRow struct {
+	IpAddress netip.Addr
+	Type      string
+}
+
+func (q *Queries) GetIPandTypefromDeviceID(ctx context.Context, id pgtype.UUID) (GetIPandTypefromDeviceIDRow, error) {
+	row := q.db.QueryRow(ctx, getIPandTypefromDeviceID, id)
+	var i GetIPandTypefromDeviceIDRow
+	err := row.Scan(&i.IpAddress, &i.Type)
+	return i, err
+}
+
 const getIPfromDeviceID = `-- name: GetIPfromDeviceID :one
 SELECT ip_address FROM devices WHERE id = $1
 `

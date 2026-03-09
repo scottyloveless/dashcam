@@ -68,10 +68,15 @@ func (app *application) collectPing(trigger Trigger) error {
 		return err
 	}
 
-	if pinger.PacketsRecv == 0 {
-		app.logger.Info(trigger.IP.String() + " is unresponsive")
+	err = app.evaluateAndAlert(ctx, trigger, "rtt_avg", float64(stats.AvgRtt.Milliseconds()))
+	if err != nil {
+		app.logger.Error(err.Error())
+		return err
 	}
-	app.logger.Info("ping collected from " + trigger.IP.String())
-
+	err = app.evaluateAndAlert(ctx, trigger, "packet_loss", stats.PacketLoss)
+	if err != nil {
+		app.logger.Error(err.Error())
+		return err
+	}
 	return nil
 }

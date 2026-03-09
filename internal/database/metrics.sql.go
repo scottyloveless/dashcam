@@ -16,7 +16,6 @@ SELECT metric_name, value, device_id, requested_at, received_at
 FROM metrics
 WHERE device_id = $1
 AND requested_at > NOW() - INTERVAL '12 hours'
-GROUP BY metric_name
 ORDER BY requested_at DESC
 `
 

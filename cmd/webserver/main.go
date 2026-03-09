@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -23,11 +24,11 @@ type config struct {
 }
 
 type application struct {
-	config       config
-	logger       *slog.Logger
-	dbpool       *pgxpool.Pool
-	queries      *database.Queries
-	activeDevice database.Device
+	config    config
+	logger    *slog.Logger
+	dbpool    *pgxpool.Pool
+	queries   *database.Queries
+	templates map[string]*template.Template
 }
 
 func main() {
@@ -63,11 +64,32 @@ func main() {
 
 	queries := database.New(pool)
 
+	templates := make(map[string]*template.Template)
+	hometemplate, err := template.ParseFiles("cmd/webserver/templates/home_template.html")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	devicePartialTemplate, err := template.ParseFiles("cmd/webserver/partials/device_partial.html")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	deviceInfoTemplate, err := template.ParseFiles("cmd/webserver/templates/deviceInfo_template.html")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	templates["home"] = hometemplate
+	templates["devicePartial"] = devicePartialTemplate
+	templates["deviceInfo"] = deviceInfoTemplate
+
 	app := application{
-		config:  cfg,
-		logger:  logger,
-		dbpool:  pool,
-		queries: queries,
+		config:    cfg,
+		logger:    logger,
+		dbpool:    pool,
+		queries:   queries,
+		templates: templates,
 	}
 
 	fs := http.FileServer(http.Dir("static"))
