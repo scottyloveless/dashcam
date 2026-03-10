@@ -3,7 +3,7 @@ CREATE TYPE state_enum AS ENUM ('open', 'acknowledged', 'resolved', 'cleared');
 CREATE TYPE severity_enum AS ENUM ('warning', 'critical');
 
 CREATE TABLE alerts (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_occurrence TIMESTAMPTZ,
     ack_at TIMESTAMPTZ,

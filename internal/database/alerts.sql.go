@@ -45,6 +45,53 @@ func (q *Queries) CheckAlert(ctx context.Context, arg CheckAlertParams) (Alert, 
 	return i, err
 }
 
+const getAlerts = `-- name: GetAlerts :many
+SELECT devices.nickname, alerts.alert_metric, alerts.severity, alerts.created_at, alerts.last_occurrence
+FROM alerts
+INNER JOIN devices ON alerts.device_id = devices.id
+WHERE state IN ('open', 'acknowledged')
+ORDER BY 
+	CASE severity
+		WHEN 'critical' THEN 1
+		WHEN 'warning' THEN 2
+	END,
+	GREATEST(alerts.created_at, alerts.last_occurrence) DESC
+`
+
+type GetAlertsRow struct {
+	Nickname       string
+	AlertMetric    string
+	Severity       SeverityEnum
+	CreatedAt      pgtype.Timestamptz
+	LastOccurrence pgtype.Timestamptz
+}
+
+func (q *Queries) GetAlerts(ctx context.Context) ([]GetAlertsRow, error) {
+	rows, err := q.db.Query(ctx, getAlerts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAlertsRow
+	for rows.Next() {
+		var i GetAlertsRow
+		if err := rows.Scan(
+			&i.Nickname,
+			&i.AlertMetric,
+			&i.Severity,
+			&i.CreatedAt,
+			&i.LastOccurrence,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateAlertLastOccurrence = `-- name: UpdateAlertLastOccurrence :exec
 UPDATE alerts
 SET last_occurrence = NOW(), severity = $1
@@ -63,21 +110,24 @@ func (q *Queries) UpdateAlertLastOccurrence(ctx context.Context, arg UpdateAlert
 
 const writeAlert = `-- name: WriteAlert :exec
 INSERT INTO alerts (
+	id,
 	last_occurrence,
 	device_id,
 	alert_metric,
 	threshold_id,
 	severity
 	) VALUES (
-	NOW(),
 	$1,
+	NOW(),
 	$2,
 	$3,
-	$4
+	$4,
+	$5
 )
 `
 
 type WriteAlertParams struct {
+	ID          pgtype.UUID
 	DeviceID    pgtype.UUID
 	AlertMetric string
 	ThresholdID pgtype.UUID
@@ -86,6 +136,7 @@ type WriteAlertParams struct {
 
 func (q *Queries) WriteAlert(ctx context.Context, arg WriteAlertParams) error {
 	_, err := q.db.Exec(ctx, writeAlert,
+		arg.ID,
 		arg.DeviceID,
 		arg.AlertMetric,
 		arg.ThresholdID,

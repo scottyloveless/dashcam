@@ -16,5 +16,12 @@
     </div>
     {{end}}
 </div>
+<div id="alerts">
+			<h3>Alerts</h3>
+				<div id="alerts"
+				hx-get="/alerts_partial"
+				hx-trigger="every 5s"
+				hx-swap="innerHTML">
+</div>
 </body>
 </html>

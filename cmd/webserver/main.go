@@ -80,8 +80,14 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
+	alertPartialTemplate, err := template.ParseFiles("cmd/webserver/partials/alerts_partial.html")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	templates["home"] = hometemplate
 	templates["devicePartial"] = devicePartialTemplate
+	templates["alertsPartial"] = alertPartialTemplate
 	templates["deviceInfo"] = deviceInfoTemplate
 
 	app := application{

@@ -15,10 +15,12 @@
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	gap: 2px;
+	font-size: 12px;
 }
 
 .list-item {
     padding: 3px;
+	font-size: 12px;
 }
 
 body {
@@ -32,4 +34,24 @@ html {
 
 h4 {
 	color: #86e1fc;
+	font-size: 12px;
+}
+
+.horizontal-list {
+  display: flex; /* Makes the list items align in a row */
+  list-style-type: none; /* Removes the default bullet points */
+  padding: 0; /* Removes default left padding/indentation */
+  margin: 0; /* Removes default margins */
+  justify-content: space-around; /* Distributes items with space around them */
+  /* Other options for justify-content: space-between, center, flex-start, flex-end */
+}
+
+.horizontal-list li {
+  /* Add spacing, padding, or other styles here */
+  padding: 10px;
+  font-size: 10px;
+}
+
+.alerts {
+	display: block;
 }
