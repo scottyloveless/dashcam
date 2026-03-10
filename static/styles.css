@@ -1,57 +1,123 @@
+/* Tokyo Night Moon palette */
+:root {
+    --bg:           #222436;
+    --bg-dark:      #1e2030;
+    --bg-highlight: #2d3f76;
+    --border:       #444a73;
+    --fg:           #c8d3f5;
+    --fg-dark:      #a9b8e8;
+    --comment:      #636da6;
+    --blue:         #82aaff;
+    --cyan:         #86e1fc;
+    --teal:         #4fd6be;
+    --green:        #c3e88d;
+    --yellow:       #ffc777;
+    --orange:       #ff966c;
+    --red:          #ff757f;
+    --red1:         #ff5370;
+    --magenta:      #c099ff;
+    --purple:       #fca7ea;
+}
+
+html {
+    color: var(--fg);
+    background-color: var(--bg);
+}
+
+body {
+    font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace;
+    margin: 0;
+    padding: 10px;
+}
+
+h3 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: var(--cyan);
+}
+
+h4 {
+    color: var(--blue);
+    font-size: 12px;
+    margin: 0;
+}
+
+/* Main layout */
+.main-layout {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 10px;
+}
+
+.locations-panel {
+    min-width: 0;
+}
+
+/* Location columns grid */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 10px;}
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
 
 .column-item {
     padding: 15px;
-    border: 1px solid #ccc;
-	border-radius: 15px;
-	font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace;
-	font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    background-color: var(--bg-dark);
 }
 
+/* Device list inside each location column */
 .device-grid {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 2px;
-	font-size: 12px;
+    display: grid;
+    grid-template-columns: minmax(60px, 2fr) minmax(80px, 1fr) minmax(60px, 1fr);
+    gap: 2px;
+    font-size: 12px;
 }
 
 .list-item {
     padding: 3px;
-	font-size: 12px;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-body {
-	font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace;
+/* Alerts sidebar */
+.alerts-panel {
+    height: fit-content;
+    position: sticky;
+    top: 10px;
 }
 
-html {	
-	color: #c8d3f5;
-	background-color: #222436;
+.alerts-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    font-size: 11px;
 }
 
-h4 {
-	color: #86e1fc;
-	font-size: 12px;
+.alert-header {
+    color: var(--blue);
+    font-size: 11px;
+    padding: 3px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
 }
 
-.horizontal-list {
-  display: flex; /* Makes the list items align in a row */
-  list-style-type: none; /* Removes the default bullet points */
-  padding: 0; /* Removes default left padding/indentation */
-  margin: 0; /* Removes default margins */
-  justify-content: space-around; /* Distributes items with space around them */
-  /* Other options for justify-content: space-between, center, flex-start, flex-end */
+.alert-cell {
+    padding: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.horizontal-list li {
-  /* Add spacing, padding, or other styles here */
-  padding: 10px;
-  font-size: 10px;
+/* Severity colors */
+.critical {
+    color: var(--red1);
 }
 
-.alerts {
-	display: block;
+.warning {
+    color: var(--yellow);
 }

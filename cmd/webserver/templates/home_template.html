@@ -4,24 +4,30 @@
 	<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="/static/styles.css">
 </head>
+<html>
 <body>
-<div class="grid-container">
-    {{range .}}
-    <div class="column-item">
-        <h3>{{.}}</h3>
-        <div id="devices-{{.}}"
-            hx-get="/device_partial?location={{.}}" 
-            hx-trigger="every 5s" 
-            hx-swap="innerHTML"></div>
+    <div class="main-layout">
+        <div class="locations-panel">
+            <div class="grid-container">
+                {{range .Locations}}
+                <div class="column-item">
+                    <h3>{{.}}</h3>
+                    <div id="devices-{{.}}"
+                        hx-get="/device_partial?location={{.}}" 
+                        hx-trigger="every 5s" 
+                        hx-swap="innerHTML">
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+		<div class="alerts-panel column-item">
+    		<h3>Active Alerts</h3>
+    		<div hx-get="/alerts_partial"
+        	 	hx-trigger="every 5s"
+        	 	hx-swap="innerHTML">
+    		</div>
+</div>
     </div>
-    {{end}}
-</div>
-<div id="alerts">
-			<h3>Alerts</h3>
-				<div id="alerts"
-				hx-get="/alerts_partial"
-				hx-trigger="every 5s"
-				hx-swap="innerHTML">
-</div>
 </body>
 </html>

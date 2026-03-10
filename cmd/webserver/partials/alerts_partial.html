@@ -1,14 +1,14 @@
-<ul class="horizontal-list">
-		<li><h4>DeviceName</h4></li>
-		<li><h4>Metric</h4></li>
-		<li><h4>Severity</h4></li>
-		<li><h4>Time</h4></li>
-	</ul>
-<ul class="horizontal-list-alert-data">
-	{{range .}}
-		<li>{{.Nickname}}</li>
-		<li>{{.AlertMetric}}</li>
-		<li>{{.Severity}}</li>
-		<li>{{.LastOccurrence}}</li>
+<div class="alerts-grid">
+    <div class="alert-header">Device</div>
+    <div class="alert-header">Metric</div>
+    <div class="alert-header">Severity</div>
+    <div class="alert-header">Created</div>
+    <!-- <div class="alert-header">Last Checked</div> -->
+    {{range .}}
+    <div class="alert-cell {{.Severity}}">{{.Nickname}}</div>
+    <div class="alert-cell {{.Severity}}">{{.AlertMetric}}</div>
+    <div class="alert-cell {{.Severity}}">{{.Severity}}</div>
+    <div class="alert-cell {{.Severity}}">{{.CreatedAt.Time.Format "01/02 15:04:05"}}</div>
+    <!-- <div class="alert-cell {{.Severity}}">{{.LastOccurrence.Time.Format "01/02 15:04:05"}}</div> -->
     {{end}}
-</ul>
+</div>
