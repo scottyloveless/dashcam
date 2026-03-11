@@ -46,7 +46,7 @@ func (q *Queries) CheckAlert(ctx context.Context, arg CheckAlertParams) (Alert, 
 }
 
 const getAlerts = `-- name: GetAlerts :many
-SELECT devices.nickname, alerts.alert_metric, alerts.severity, alerts.created_at, alerts.last_occurrence
+SELECT devices.nickname, alerts.alert_metric, alerts.severity, alerts.created_at, alerts.last_occurrence, alerts.id
 FROM alerts
 INNER JOIN devices ON alerts.device_id = devices.id
 WHERE state IN ('open', 'acknowledged')
@@ -64,6 +64,7 @@ type GetAlertsRow struct {
 	Severity       SeverityEnum
 	CreatedAt      pgtype.Timestamptz
 	LastOccurrence pgtype.Timestamptz
+	ID             pgtype.UUID
 }
 
 func (q *Queries) GetAlerts(ctx context.Context) ([]GetAlertsRow, error) {
@@ -81,6 +82,7 @@ func (q *Queries) GetAlerts(ctx context.Context) ([]GetAlertsRow, error) {
 			&i.Severity,
 			&i.CreatedAt,
 			&i.LastOccurrence,
+			&i.ID,
 		); err != nil {
 			return nil, err
 		}

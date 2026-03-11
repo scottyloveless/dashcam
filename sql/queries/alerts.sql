@@ -27,7 +27,7 @@ SET last_occurrence = NOW(), severity = $1
 WHERE id = $2;
 
 -- name: GetAlerts :many
-SELECT devices.nickname, alerts.alert_metric, alerts.severity, alerts.created_at, alerts.last_occurrence
+SELECT devices.nickname, alerts.alert_metric, alerts.severity, alerts.created_at, alerts.last_occurrence, alerts.id
 FROM alerts
 INNER JOIN devices ON alerts.device_id = devices.id
 WHERE state IN ('open', 'acknowledged')
@@ -37,3 +37,11 @@ ORDER BY
 		WHEN 'warning' THEN 2
 	END,
 	GREATEST(alerts.created_at, alerts.last_occurrence) DESC;
+
+-- name: GetLastFiveMetricsByDeviceID :many
+SELECT *
+FROM metrics
+WHERE metric_name = $1 AND device_id = $2
+ORDER BY GREATEST(created_at) DESC 
+LIMIT 5;
+
