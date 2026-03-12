@@ -41,6 +41,7 @@ ORDER BY
 -- name: GetLastFiveMetricsByDeviceID :many
 SELECT *
 FROM metrics
+INNER JOIN thresholds ON 
 WHERE metric_name = $1 AND device_id = $2
 ORDER BY GREATEST(created_at) DESC 
 LIMIT 5;
