@@ -1,0 +1,48 @@
+[sqlfluff]
+# Use the PostgreSQL dialect
+dialect = postgres
+# Use Jinja templating (common with tools like dbt)
+templater = jinja
+# Define file extensions to lint
+sql_file_exts = .sql,.sql.j2
+
+# Set max line length
+max_line_length = 100
+
+# Exclude specific rules if they conflict with existing standards
+# Example: L031 (using explicit instead of implicit aliasing)
+# exclude_rules = L031
+
+[sqlfluff:indentation]
+indent_unit = space
+tab_space_size = 4
+indented_joins = False
+indented_ctes = False
+indented_using_on = True
+
+[sqlfluff:rules:capitalisation]
+# Enforce uppercase for all keywords (SELECT, FROM, etc.)
+keywords = upper
+# Enforce lowercase for unquoted identifiers (table and column names)
+unquoted_identifiers = lower
+# Enforce uppercase for functions
+functions = upper
+
+[sqlfluff:rules:L014]
+# Enforce consistent capitalization for keywords
+capitalisation_policy = upper
+
+[sqlfluff:rules:L015]
+# Enforce consistent capitalization for unquoted identifiers
+capitalisation_policy = lower
+
+[sqlfluff:rules:L030]
+# Enforce consistent capitalization for function names
+capitalisation_policy = upper
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = True
+load_macros_from_path = ./sql/schema
+# loader_search_path = included_templates
+library_path = sql/schema
+# exclude_macros_from_path = my_macros_exclude
