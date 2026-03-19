@@ -12,7 +12,8 @@ import (
 )
 
 const getDevices = `-- name: GetDevices :many
-SELECT id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags FROM devices
+SELECT id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags
+FROM devices
 `
 
 func (q *Queries) GetDevices(ctx context.Context) ([]Device, error) {

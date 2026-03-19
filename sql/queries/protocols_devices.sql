@@ -7,7 +7,7 @@ SELECT
     port,
     polling_rate,
     encryption,
-    vault_reverence
+    vault_reference
 FROM devices_protocols;
 
 -- name: GetIPfromDeviceID :one

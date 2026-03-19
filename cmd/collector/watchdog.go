@@ -1,16 +1,52 @@
 package main
 
-import "context"
+import (
+	"context"
 
-func (app *application) watchdog() {
-	ctx := context.Background()
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/scottyloveless/dashcam/internal/database"
+)
 
-	alerts, err := app.queries.GetAlerts(ctx)
+func (app *application) watchdog(alert database.GetAlertsRow, trigger Trigger, ctx context.Context) {
+	reqPayload := database.GetLastFiveMetricsByDeviceIDParams{
+		MetricName: alert.AlertMetric,
+		DeviceID:   alert.DeviceID,
+	}
+
+	lastFive, err := app.queries.GetLastFiveMetricsByDeviceID(ctx, reqPayload)
 	if err != nil {
 		app.logger.Error(err.Error())
 		return
 	}
 
-	for _, alert := range alerts {
+	if len(lastFive) != 5 {
+		return
+	}
+
+	threshParams := database.GetActiveThresholdParams{
+		DeviceID: trigger.Trigger.DeviceID,
+		DeviceType: pgtype.Text{
+			String: trigger.Type,
+			Valid:  true,
+		},
+		Metric: alert.AlertMetric,
+	}
+
+	thresh, err := app.queries.GetActiveThreshold(ctx, threshParams)
+	if err != nil {
+		app.logger.Error(err.Error())
+		return
+	}
+
+	for _, metric := range lastFive {
+		sev := app.evaluateThreshold(metric.Value, thresh)
+		if sev != nil {
+			return
+		}
+	}
+
+	err = app.queries.ClearAlert(ctx, alert.ID)
+	if err != nil {
+		app.logger.Error(err.Error())
 	}
 }

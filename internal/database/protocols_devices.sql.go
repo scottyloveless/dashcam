@@ -13,7 +13,11 @@ import (
 )
 
 const getIPandTypefromDeviceID = `-- name: GetIPandTypefromDeviceID :one
-SELECT ip_address, type FROM devices WHERE id = $1
+SELECT
+    ip_address,
+    type
+FROM devices
+WHERE id = $1
 `
 
 type GetIPandTypefromDeviceIDRow struct {
@@ -29,7 +33,9 @@ func (q *Queries) GetIPandTypefromDeviceID(ctx context.Context, id pgtype.UUID) 
 }
 
 const getIPfromDeviceID = `-- name: GetIPfromDeviceID :one
-SELECT ip_address FROM devices WHERE id = $1
+SELECT ip_address
+FROM devices
+WHERE id = $1
 `
 
 func (q *Queries) GetIPfromDeviceID(ctx context.Context, id pgtype.UUID) (netip.Addr, error) {
@@ -40,7 +46,16 @@ func (q *Queries) GetIPfromDeviceID(ctx context.Context, id pgtype.UUID) (netip.
 }
 
 const getProtocolsDevices = `-- name: GetProtocolsDevices :many
-SELECT device_id, protocol_id, enabled, assigned_at, port, polling_rate, encryption, vault_reference FROM devices_protocols
+SELECT
+    device_id,
+    protocol_id,
+    enabled,
+    assigned_at,
+    port,
+    polling_rate,
+    encryption,
+    vault_reference
+FROM devices_protocols
 `
 
 func (q *Queries) GetProtocolsDevices(ctx context.Context) ([]DevicesProtocol, error) {

@@ -12,10 +12,26 @@ import (
 )
 
 const checkAlert = `-- name: CheckAlert :one
-SELECT id, created_at, last_occurrence, ack_at, resolved_at, cleared_at, device_id, ack_by, resolved_by, alert_metric, threshold_id, severity, state, notes FROM alerts
-WHERE device_id = $1
-AND alert_metric = $2
-AND state IN ('open', 'acknowledged')
+SELECT
+    id,
+    created_at,
+    last_occurrence,
+    ack_at,
+    resolved_at,
+    cleared_at,
+    device_id,
+    ack_by,
+    resolved_by,
+    alert_metric,
+    threshold_id,
+    severity,
+    state,
+    notes
+FROM alerts
+WHERE
+    device_id = $1
+    AND alert_metric = $2
+    AND state IN ('open', 'acknowledged')
 `
 
 type CheckAlertParams struct {
@@ -45,20 +61,42 @@ func (q *Queries) CheckAlert(ctx context.Context, arg CheckAlertParams) (Alert, 
 	return i, err
 }
 
+const clearAlert = `-- name: ClearAlert :exec
+UPDATE alerts
+SET
+    state = 'cleared',
+    cleared_at = NOW()
+WHERE id = $1
+`
+
+func (q *Queries) ClearAlert(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, clearAlert, id)
+	return err
+}
+
 const getAlerts = `-- name: GetAlerts :many
-SELECT devices.nickname, alerts.alert_metric, alerts.severity, alerts.created_at, alerts.last_occurrence, alerts.id
+SELECT
+    devices.id AS device_id,
+    devices.nickname,
+    alerts.alert_metric,
+    alerts.severity,
+    alerts.created_at,
+    alerts.last_occurrence,
+    alerts.id
 FROM alerts
-INNER JOIN devices ON alerts.device_id = devices.id
-WHERE state IN ('open', 'acknowledged')
-ORDER BY 
-	CASE severity
-		WHEN 'critical' THEN 1
-		WHEN 'warning' THEN 2
-	END,
-	GREATEST(alerts.created_at, alerts.last_occurrence) DESC
+INNER JOIN devices
+    ON alerts.device_id = devices.id
+WHERE alerts.state IN ('open', 'acknowledged')
+ORDER BY
+    CASE alerts.severity
+        WHEN 'critical' THEN 1
+        WHEN 'warning' THEN 2
+    END,
+    GREATEST(alerts.created_at, alerts.last_occurrence) DESC
 `
 
 type GetAlertsRow struct {
+	DeviceID       pgtype.UUID
 	Nickname       string
 	AlertMetric    string
 	Severity       SeverityEnum
@@ -77,6 +115,7 @@ func (q *Queries) GetAlerts(ctx context.Context) ([]GetAlertsRow, error) {
 	for rows.Next() {
 		var i GetAlertsRow
 		if err := rows.Scan(
+			&i.DeviceID,
 			&i.Nickname,
 			&i.AlertMetric,
 			&i.Severity,
@@ -96,7 +135,9 @@ func (q *Queries) GetAlerts(ctx context.Context) ([]GetAlertsRow, error) {
 
 const updateAlertLastOccurrence = `-- name: UpdateAlertLastOccurrence :exec
 UPDATE alerts
-SET last_occurrence = NOW(), severity = $1
+SET
+    last_occurrence = NOW(),
+    severity = $1
 WHERE id = $2
 `
 
@@ -112,19 +153,19 @@ func (q *Queries) UpdateAlertLastOccurrence(ctx context.Context, arg UpdateAlert
 
 const writeAlert = `-- name: WriteAlert :exec
 INSERT INTO alerts (
-	id,
-	last_occurrence,
-	device_id,
-	alert_metric,
-	threshold_id,
-	severity
-	) VALUES (
-	$1,
-	NOW(),
-	$2,
-	$3,
-	$4,
-	$5
+    id,
+    last_occurrence,
+    device_id,
+    alert_metric,
+    threshold_id,
+    severity
+) VALUES (
+    $1,
+    NOW(),
+    $2,
+    $3,
+    $4,
+    $5
 )
 `
 

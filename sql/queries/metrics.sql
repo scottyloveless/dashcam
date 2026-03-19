@@ -34,3 +34,15 @@ WHERE
     device_id = $1
     AND requested_at > NOW() - INTERVAL '12 hours'
 ORDER BY requested_at DESC;
+
+-- name: GetLastFiveMetricsByDeviceID :many
+SELECT
+    metric_name,
+    value,
+    device_id,
+    requested_at,
+    received_at
+FROM metrics
+WHERE metric_name = $1 AND device_id = $2
+ORDER BY requested_at DESC
+LIMIT 5;
