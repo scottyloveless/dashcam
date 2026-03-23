@@ -7,12 +7,104 @@ package database
 
 import (
 	"context"
+	"net/netip"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createDevice = `-- name: CreateDevice :exec
+INSERT INTO devices (
+    id,
+    nickname,
+    hostname,
+    ip_address,
+    last_seen_at,
+    polling_interval,
+    serial,
+    manufacturer,
+    model,
+    location,
+    room,
+    type,
+    os,
+    notes,
+    tags
+)
+VALUES (
+    uuid(),
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14
+)
+`
+
+type CreateDeviceParams struct {
+	Nickname        string
+	Hostname        pgtype.Text
+	IpAddress       netip.Addr
+	LastSeenAt      pgtype.Timestamptz
+	PollingInterval pgtype.Interval
+	Serial          pgtype.Text
+	Manufacturer    pgtype.Text
+	Model           pgtype.Text
+	Location        string
+	Room            pgtype.Text
+	Type            string
+	Os              pgtype.Text
+	Notes           pgtype.Text
+	Tags            []byte
+}
+
+func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) error {
+	_, err := q.db.Exec(ctx, createDevice,
+		arg.Nickname,
+		arg.Hostname,
+		arg.IpAddress,
+		arg.LastSeenAt,
+		arg.PollingInterval,
+		arg.Serial,
+		arg.Manufacturer,
+		arg.Model,
+		arg.Location,
+		arg.Room,
+		arg.Type,
+		arg.Os,
+		arg.Notes,
+		arg.Tags,
+	)
+	return err
+}
+
 const getDevices = `-- name: GetDevices :many
-SELECT id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags
+SELECT
+    id,
+    created_at,
+    nickname,
+    hostname,
+    ip_address,
+    last_seen_at,
+    enabled,
+    polling_interval,
+    serial,
+    manufacturer,
+    model,
+    location,
+    room,
+    type,
+    os,
+    notes,
+    tags
 FROM devices
 `
 
@@ -55,7 +147,26 @@ func (q *Queries) GetDevices(ctx context.Context) ([]Device, error) {
 }
 
 const getDevicesOneLocation = `-- name: GetDevicesOneLocation :many
-SELECT id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags FROM devices WHERE location = $1
+SELECT
+    id,
+    created_at,
+    nickname,
+    hostname,
+    ip_address,
+    last_seen_at,
+    enabled,
+    polling_interval,
+    serial,
+    manufacturer,
+    model,
+    location,
+    room,
+    type,
+    os,
+    notes,
+    tags
+FROM devices
+WHERE location = $1
 `
 
 func (q *Queries) GetDevicesOneLocation(ctx context.Context, location string) ([]Device, error) {
@@ -121,7 +232,26 @@ func (q *Queries) GetDistinctLocations(ctx context.Context) ([]string, error) {
 }
 
 const getOneDeviceInfo = `-- name: GetOneDeviceInfo :one
-SELECT id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags FROM devices WHERE id = $1
+SELECT
+    id,
+    created_at,
+    nickname,
+    hostname,
+    ip_address,
+    last_seen_at,
+    enabled,
+    polling_interval,
+    serial,
+    manufacturer,
+    model,
+    location,
+    room,
+    type,
+    os,
+    notes,
+    tags
+FROM devices
+WHERE id = $1
 `
 
 func (q *Queries) GetOneDeviceInfo(ctx context.Context, id pgtype.UUID) (Device, error) {
