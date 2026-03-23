@@ -102,5 +102,28 @@ func main() {
 			}
 		}(protocol)
 	}
+
+	watchdogTicker := time.NewTicker(5 * time.Second)
+	defer watchdogTicker.Stop()
+
+	// watchDogCycleCount := 1
+
+	go func() {
+		for range watchdogTicker.C {
+			// app.logger.Info("watchdog cycle: " + strconv.Itoa(watchDogCycleCount))
+			alerts, err := app.queries.GetAlerts(ctx)
+			if err != nil {
+				app.logger.Error(err.Error())
+				continue
+			}
+			for _, alert := range alerts {
+				app.logger.Info(alert.Nickname)
+				app.watchdog(alert, ctx)
+			}
+
+			// watchDogCycleCount++
+		}
+	}()
+
 	select {}
 }

@@ -7,10 +7,16 @@ import (
 	"github.com/scottyloveless/dashcam/internal/database"
 )
 
-func (app *application) watchdog(alert database.GetAlertsRow, trigger Trigger, ctx context.Context) {
+func (app *application) watchdog(alert database.GetAlertsRow, ctx context.Context) {
 	reqPayload := database.GetLastFiveMetricsByDeviceIDParams{
 		MetricName: alert.AlertMetric,
 		DeviceID:   alert.DeviceID,
+	}
+
+	ipAndType, err := app.queries.GetIPandTypefromDeviceID(ctx, alert.DeviceID)
+	if err != nil {
+		app.logger.Error(err.Error())
+		return
 	}
 
 	lastFive, err := app.queries.GetLastFiveMetricsByDeviceID(ctx, reqPayload)
@@ -24,9 +30,9 @@ func (app *application) watchdog(alert database.GetAlertsRow, trigger Trigger, c
 	}
 
 	threshParams := database.GetActiveThresholdParams{
-		DeviceID: trigger.Trigger.DeviceID,
+		DeviceID: alert.DeviceID,
 		DeviceType: pgtype.Text{
-			String: trigger.Type,
+			String: ipAndType.Type,
 			Valid:  true,
 		},
 		Metric: alert.AlertMetric,
