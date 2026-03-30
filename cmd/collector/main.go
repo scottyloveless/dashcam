@@ -18,12 +18,18 @@ import (
 
 type config struct {
 	env string
+	db  struct {
+		dsn          string
+		maxOpenConns int
+		maxIdleConns int
+		maxIdleTime  time.Duration
+	}
 }
 
 type application struct {
 	config    config
 	logger    *slog.Logger
-	dbpool    *pgxpool.Pool
+	pool      *pgxpool.Pool
 	queries   *database.Queries
 	protocols []Trigger
 }
@@ -32,6 +38,11 @@ func main() {
 	var cfg config
 
 	flag.StringVar(&cfg.env, "env", "development", "development|staging|production")
+
+	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "Postgres max open connections")
+	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "Postgres max idle connections")
+	flag.DurationVar(&cfg.db.maxIdleTime, "db-max-idle-time", 15*time.Minute, "Postgres max idle time")
+
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -41,29 +52,19 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
-	dburl := os.Getenv("DATABASE_URL")
+	cfg.db.dsn = os.Getenv("DATABASE_URL")
 
-	ctx := context.Background()
-	pool, err := pgxpool.New(ctx, dburl)
+	pool, err := openDB(cfg)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
-	defer pool.Close()
-
-	err = pool.Ping(ctx)
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
-	logger.Info("database connection successful")
-
 	queries := database.New(pool)
 
 	app := application{
 		config:    cfg,
 		logger:    logger,
-		dbpool:    pool,
+		pool:      pool,
 		queries:   queries,
 		protocols: []Trigger{},
 	}
@@ -107,6 +108,7 @@ func main() {
 	defer watchdogTicker.Stop()
 
 	// watchDogCycleCount := 1
+	ctx := context.Background()
 
 	go func() {
 		for range watchdogTicker.C {
@@ -126,4 +128,23 @@ func main() {
 	}()
 
 	select {}
+}
+
+func openDB(cfg config) (*pgxpool.Pool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pool, err := pgxpool.New(ctx, cfg.db.dsn)
+	if err != nil {
+		return nil, err
+	}
+	defer pool.Close()
+
+	err = pool.Ping(ctx)
+	if err != nil {
+		defer pool.Close()
+		return nil, err
+	}
+
+	return pool, nil
 }
