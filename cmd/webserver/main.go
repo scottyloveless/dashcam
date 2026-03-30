@@ -21,6 +21,9 @@ const version = "1.0.0"
 type config struct {
 	port int
 	env  string
+	db   struct {
+		dsn string
+	}
 }
 
 type application struct {
@@ -45,23 +48,15 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
-	dburl := os.Getenv("DATABASE_URL")
+	cfg.db.dsn = os.Getenv("DATABASE_URL")
 
-	ctx := context.Background()
-	pool, err := pgxpool.New(ctx, dburl)
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
-	defer pool.Close()
-
-	err = pool.Ping(ctx)
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
 	logger.Info("database connection successful")
 
+	pool, err := openDB(cfg)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	queries := database.New(pool)
 
 	templates := make(map[string]*template.Template)
@@ -90,7 +85,7 @@ func main() {
 	templates["alertsPartial"] = alertPartialTemplate
 	templates["deviceInfo"] = deviceInfoTemplate
 
-	app := application{
+	app := &application{
 		config:    cfg,
 		logger:    logger,
 		dbpool:    pool,
@@ -115,4 +110,23 @@ func main() {
 	err = srv.ListenAndServe()
 	logger.Error(err.Error())
 	os.Exit(1)
+}
+
+func openDB(cfg config) (*pgxpool.Pool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pool, err := pgxpool.New(ctx, cfg.db.dsn)
+	if err != nil {
+		return nil, err
+	}
+	defer pool.Close()
+
+	err = pool.Ping(ctx)
+	if err != nil {
+		defer pool.Close()
+		return nil, err
+	}
+
+	return pool, nil
 }
