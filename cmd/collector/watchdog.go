@@ -25,7 +25,7 @@ func (app *application) watchdog(alert database.GetAlertsRow, ctx context.Contex
 		return
 	}
 
-	if len(lastFive) != 5 {
+	if len(lastFive) < 5 {
 		return
 	}
 
