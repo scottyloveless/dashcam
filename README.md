@@ -30,14 +30,14 @@
 
 ## Installation
 
-### Clone this repo
+### 1. Clone this repo
 
 ```bash
 git clone https://github.com/scottyloveless/dashcam
 cd dashcam
 ```
 
-### Add PostgreSQL DSN to .env
+### 2. Add PostgreSQL DSN to .env
 
 Create a new database in your PosgreSQL instance and add the DSN to your .env file as `DATABASE_URL`.
 
@@ -53,18 +53,18 @@ If you run into an error about ssl, add `?sslmode=disable` to the end of your DS
 DATABASE_URL="postgres://user:password@localhost:5432/dbname?sslmode=disable"
 ```
 
-### Run collector service to begin gathering metrics
+### 3. Run collector service to begin gathering metrics
 
 ```bash
 go run ./cmd/collector/
 ```
 
-### Run webserver service to view dashboard in separate terminal session
+### 4. Run webserver service to view dashboard in separate terminal session
 
 ```bash
    go run ./cmd/webserver/
 ```
 
-### View dashboard in browser
+### 5. View dashboard in browser
 
 `https://localhost:4000` (or your custom port defined in cmd/webserver/main.go)
