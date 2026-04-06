@@ -8,6 +8,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/prometheus-community/pro-bing v0.8.0
+	golang.org/x/crypto v0.48.0
 )
 
 require (
