@@ -16,6 +16,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/device_partial", app.devicePartialHandler)
 	router.HandlerFunc(http.MethodGet, "/alerts_partial", app.alertsPartialHandler)
 	router.HandlerFunc(http.MethodGet, "/device/:id", app.devicePageHandler)
+	router.HandlerFunc(http.MethodPost, "/login", app.loginHandler)
 
 	return router
 }
