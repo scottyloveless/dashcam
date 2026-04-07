@@ -16,12 +16,12 @@ INSERT INTO sessions (
   id,
   user_id,
   created_at,
-  refresh_at,
+  refreshed_at,
   expires_at,
   token_hash
 )
 VALUES (
-  uuid(),
+  gen_random_uuid(),
   $1,
   now(),
   now(),
@@ -37,6 +37,54 @@ type CreateSessionParams struct {
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) error {
 	_, err := q.db.Exec(ctx, createSession, arg.UserID, arg.TokenHash)
+	return err
+}
+
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (
+    id,
+    first_name,
+    last_name,
+    role,
+    job_title,
+    email,
+    phone_number,
+    password_hash
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8
+)
+`
+
+type CreateUserParams struct {
+	ID           pgtype.UUID
+	FirstName    string
+	LastName     string
+	Role         RolesEnum
+	JobTitle     pgtype.Text
+	Email        string
+	PhoneNumber  string
+	PasswordHash string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.Exec(ctx, createUser,
+		arg.ID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Role,
+		arg.JobTitle,
+		arg.Email,
+		arg.PhoneNumber,
+		arg.PasswordHash,
+	)
 	return err
 }
 
@@ -118,4 +166,15 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.OnCall,
 	)
 	return i, err
+}
+
+const updateLastLogin = `-- name: UpdateLastLogin :exec
+UPDATE users
+SET last_login = NOW()
+WHERE id = $1
+`
+
+func (q *Queries) UpdateLastLogin(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, updateLastLogin, id)
+	return err
 }
