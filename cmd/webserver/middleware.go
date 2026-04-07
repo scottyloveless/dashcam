@@ -9,12 +9,16 @@ import (
 
 func (app *application) requireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.logger.Info("requireAuth hit", "path", r.URL.Path)
+
 		cookie, err := r.Cookie("token")
 		if err != nil {
-			app.logger.Error("no cookie found")
+			app.logger.Info(err.Error())
+			// app.logger.Error(err.Error())
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
+		app.logger.Info("cookie found", "value", cookie.Value[:8])
 
 		rawToken := cookie.Value
 		hashBytes := sha256.Sum256([]byte(rawToken))

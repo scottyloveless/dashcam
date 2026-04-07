@@ -138,11 +138,10 @@ func openDB(cfg config) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer pool.Close()
 
 	err = pool.Ping(ctx)
 	if err != nil {
-		defer pool.Close()
+		pool.Close()
 		return nil, err
 	}
 
