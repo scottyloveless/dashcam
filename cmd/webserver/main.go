@@ -88,10 +88,16 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
+	loginTemplate, err := template.ParseFiles("cmd/webserver/templates/login.html")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	templates["home"] = hometemplate
 	templates["devicePartial"] = devicePartialTemplate
 	templates["alertsPartial"] = alertPartialTemplate
 	templates["deviceInfo"] = deviceInfoTemplate
+	templates["login"] = loginTemplate
 
 	app := &application{
 		config:    cfg,

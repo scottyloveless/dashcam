@@ -6,14 +6,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) devicePageHandler(w http.ResponseWriter, r *http.Request) {
-	params := httprouter.ParamsFromContext(r.Context())
+	params := r.PathValue("id")
 
-	unparsedUUID := params.ByName("id")
-	parsedUUID, err := uuid.Parse(unparsedUUID)
+	parsedUUID, err := uuid.Parse(params)
 	if err != nil {
 		app.logger.Error(err.Error())
 		return

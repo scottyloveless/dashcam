@@ -121,3 +121,84 @@ h4 {
 .warning {
     color: var(--yellow);
 }
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-box {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 40px;
+    width: 320px;
+}
+
+.login-title {
+    color: var(--cyan);
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    text-align: center;
+}
+
+.login-subtitle {
+    color: var(--comment);
+    font-size: 11px;
+    text-align: center;
+    margin: 0 0 32px 0;
+}
+
+.login-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.login-field label {
+    color: var(--fg-dark);
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+
+.login-field input {
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--fg);
+    font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace;
+    font-size: 12px;
+    padding: 8px;
+    outline: none;
+}
+
+.login-field input:focus {
+    border-color: var(--cyan);
+}
+
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--bg-highlight);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--cyan);
+    font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.login-button:hover {
+    background-color: var(--border);
+}
+
+.login-error {
+    color: var(--red1);
+    font-size: 11px;
+    text-align: center;
+    margin-bottom: 16px;
+}
