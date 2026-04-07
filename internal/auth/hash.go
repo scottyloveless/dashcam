@@ -9,4 +9,4 @@ func createHash(pw []byte) ([]byte, error) {
 	}
 
 	return hash, nil
-}
+
