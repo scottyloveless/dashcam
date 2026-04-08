@@ -2,20 +2,21 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func (app *application) routes() http.Handler {
-	router := httprouter.New()
+	mux := http.NewServeMux()
 
-	router.ServeFiles("/static/*filepath", http.Dir("static"))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
-	router.HandlerFunc(http.MethodGet, "/", app.homepageHandler)
-	router.HandlerFunc(http.MethodGet, "/device_partial", app.devicePartialHandler)
-	router.HandlerFunc(http.MethodGet, "/alerts_partial", app.alertsPartialHandler)
-	router.HandlerFunc(http.MethodGet, "/device/:id", app.devicePageHandler)
+	mux.HandleFunc("GET /v1/healthcheck", app.healthcheckHandler)
+	mux.HandleFunc("GET /login", app.loginGetHandler)
+	mux.HandleFunc("POST /login", app.loginPostHandler)
+	mux.Handle("GET /", app.requireAuth(http.HandlerFunc(app.homepageHandler)))
+	mux.Handle("GET /device_partial", app.requireAuth(http.HandlerFunc(app.devicePartialHandler)))
+	mux.Handle("GET /alerts_partial", app.requireAuth(http.HandlerFunc(app.alertsPartialHandler)))
+	mux.Handle("GET /device/{id}", app.requireAuth(http.HandlerFunc(app.devicePageHandler)))
+	mux.Handle("POST /logout", app.requireAuth(http.HandlerFunc(app.logoutHandler)))
 
-	return router
+	return mux
 }
