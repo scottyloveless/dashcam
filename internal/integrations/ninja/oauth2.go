@@ -1,9 +1,9 @@
-package main
+// Package ninja
+package ninja
 
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"time"
@@ -47,26 +47,4 @@ func NewClient(ctx context.Context) (*Client, error) {
 		httpClient: cfg.Client(ctx),
 		baseURL:    baseURL,
 	}, nil
-}
-
-func main() {
-	c, err := NewClient(context.Background())
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-
-	resp, err := c.httpClient.Get(c.baseURL + "/v2/alerts")
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-
-	fmt.Print(string(data))
 }
