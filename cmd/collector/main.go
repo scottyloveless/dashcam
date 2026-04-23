@@ -146,8 +146,8 @@ func main() {
 				continue
 			}
 
-			for range ninjaAlerts {
-				logger.Info("Found an alert!")
+			for _, alert := range ninjaAlerts {
+				logger.Info(alert.DeviceName + ": " + alert.Message)
 			}
 		}
 	}()
