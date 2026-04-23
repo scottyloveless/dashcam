@@ -7,16 +7,16 @@ import (
 	"time"
 )
 
-type NinjaAlerts []struct {
-	UID             string    `json:"uid,omitzero"`
-	DeviceID        int       `json:"deviceId,omitzero"`
-	Message         time.Time `json:"message,omitzero"`
-	CreateTime      float64   `json:"createTime,omitzero"`
-	UpdateTime      float64   `json:"updateTime,omitzero"`
-	SourceType      string    `json:"sourceType,omitzero"`
-	SourceConfigUID string    `json:"sourceConfigUid,omitzero"`
-	SourceName      string    `json:"sourceName,omitzero"`
-	Subject         string    `json:"subject,omitzero"`
+type NinjaAlerts struct {
+	UID             string  `json:"uid,omitzero"`
+	DeviceID        int     `json:"deviceId,omitzero"`
+	Message         string  `json:"message,omitzero"`
+	CreateTime      float64 `json:"createTime,omitzero"`
+	UpdateTime      float64 `json:"updateTime,omitzero"`
+	SourceType      string  `json:"sourceType,omitzero"`
+	SourceConfigUID string  `json:"sourceConfigUid,omitzero"`
+	SourceName      string  `json:"sourceName,omitzero"`
+	Subject         string  `json:"subject,omitzero"`
 	Data            struct {
 		Message struct {
 			Code   string `json:"code,omitzero"`
@@ -36,13 +36,13 @@ type NinjaAlerts []struct {
 	UseGlobalHealthStatus bool   `json:"useGlobalHealthStatus,omitzero"`
 }
 
-func GetAlerts() ([]NinjaAlerts, error) {
+func (c *Client) GetAlerts() ([]NinjaAlerts, error) {
 	c, err := NewClient(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.httpClient.Get(c.baseURL + "/v2/alerts")
+	resp, err := c.HTTPClient.Get(c.BaseURL + "/v2/alerts")
 	if err != nil {
 		return nil, err
 	}

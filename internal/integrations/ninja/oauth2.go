@@ -14,8 +14,8 @@ import (
 )
 
 type Client struct {
-	httpClient *http.Client
-	baseURL    string
+	HTTPClient *http.Client
+	BaseURL    string
 }
 
 func NewClient(ctx context.Context) (*Client, error) {
@@ -44,7 +44,7 @@ func NewClient(ctx context.Context) (*Client, error) {
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, tokenFetchClient)
 
 	return &Client{
-		httpClient: cfg.Client(ctx),
-		baseURL:    baseURL,
+		HTTPClient: cfg.Client(ctx),
+		BaseURL:    baseURL,
 	}, nil
 }

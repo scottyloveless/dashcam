@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/scottyloveless/dashcam/internal/database"
+	"github.com/scottyloveless/dashcam/internal/integrations/ninja"
 )
 
 // const version = "1.0.0"
@@ -124,6 +125,30 @@ func main() {
 			}
 
 			// watchDogCycleCount++
+		}
+	}()
+
+	ninjaTicker := time.NewTicker(5 * time.Second)
+	defer ninjaTicker.Stop()
+
+	ninjaClient, err := ninja.NewClient(ctx)
+	if err != nil {
+		logger.Error(err.Error())
+		time.Sleep(5 * time.Second)
+		return
+	}
+
+	go func() {
+		for range ninjaTicker.C {
+			ninjaAlerts, err := ninjaClient.GetAlerts()
+			if err != nil {
+				logger.Error(err.Error())
+				continue
+			}
+
+			for range ninjaAlerts {
+				logger.Info("Found an alert!")
+			}
 		}
 	}()
 
