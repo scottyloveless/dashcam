@@ -2,9 +2,13 @@ package ninja
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/scottyloveless/dashcam/internal/database"
 )
 
 type NinjaAlerts struct {
@@ -105,6 +109,52 @@ func FloatToTime(f float64) time.Time {
 		return time.Now()
 	}
 	return time.Unix(int64(f), 0)
+}
+
+func (a NinjaAlerts) MapNinjaSeverity() string {
+	switch a.Severity {
+	case "critical", "major":
+		return "critical"
+	default:
+		return "warning"
+	}
+}
+
+func (a NinjaAlerts) Metric() string {
+	if a.ConditionName != "" {
+		return a.ConditionName
+	}
+	if a.Subject != "" {
+		return a.Subject
+	}
+	return "unknown"
+}
+
+func (a NinjaAlerts) DisplayMessage() string {
+	metric := a.Metric()
+	msg := a.Message
+	if msg == "" {
+		msg = a.Subject
+	}
+	if msg == "" {
+		return fmt.Sprintf("%s — %s", a.DeviceName, metric)
+	}
+	return fmt.Sprintf("%s — %s: %s", a.DeviceName, metric, msg)
+}
+
+func (a NinjaAlerts) ToUpsertParams() database.UpsertExternalAlertParams {
+	rawJSON, _ := json.Marshal(a) // errors here are essentially impossible for a struct we just unmarshaled
+	return database.UpsertExternalAlertParams{
+		CreatedAt:          pgtype.Timestamptz{Time: FloatToTime(a.CreateTime), Valid: true},
+		LastOccurrence:     pgtype.Timestamptz{Time: FloatToTime(a.UpdateTime), Valid: true},
+		Source:             "ninja",
+		SourceRef:          pgtype.Text{String: a.UID, Valid: true},
+		ExternalDeviceName: pgtype.Text{String: a.DeviceName, Valid: true},
+		AlertMetric:        a.Metric(),
+		Severity:           database.SeverityEnum(a.MapNinjaSeverity()),
+		DisplayMessage:     a.DisplayMessage(),
+		ExternalRawJson:    rawJSON,
+	}
 }
 
 func (c *Client) GetAlerts() ([]NinjaAlerts, []byte, error) {

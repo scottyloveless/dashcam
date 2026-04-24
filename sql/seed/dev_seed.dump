@@ -1,0 +1,80 @@
+--
+-- PostgreSQL database dump
+--
+
+\restrict 2LbMtL7kBLzkY04svCwMYYT5Xq7RicMavrIGgJhrIswyvYLbTSKPoeMdCNmFQ4a
+
+-- Dumped from database version 17.9 (Homebrew)
+-- Dumped by pg_dump version 17.9
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Data for Name: devices; Type: TABLE DATA; Schema: public; Owner: mox
+--
+
+COPY public.devices (id, created_at, nickname, hostname, ip_address, last_seen_at, enabled, polling_interval, serial, manufacturer, model, location, room, type, os, notes, tags) FROM stdin;
+ade17d9a-3081-4ae4-8ba5-f8253979bfaf	2026-03-04 12:55:30.953836-06	Cloudflare DNS	\N	1.1.1.1	\N	t	\N	\N	\N	\N	Cloud	\N	Switch	\N	\N	\N
+baa8df49-c984-47bb-9b31-d85e51da356a	2026-03-04 12:56:45.95087-06	Google DNS	\N	8.8.8.8	\N	t	\N	\N	\N	\N	Cloud	\N	Switch	\N	\N	\N
+8e5b95b1-9461-41e4-8e5b-ce69f042f1d8	2026-03-06 12:02:04.83276-06	Fortiguard DNS	\N	96.45.45.45	\N	t	\N	\N	\N	\N	Cloud	\N	DNS	\N	\N	\N
+a86d12ef-6aff-4f37-8b66-bfaaf7553fbb	2026-03-08 20:07:34.322397-05	Failed Ping Test	\N	11.1.1.1	\N	t	\N	\N	\N	\N	Cloud	\N	Firewall	\N	\N	\N
+01ce0004-f164-4092-af15-197e30537f31	2026-03-09 13:46:38.867554-05	Scottys Phone	\N	192.168.1.79	\N	t	\N	\N	\N	\N	Scottys House	\N	Mobile	\N	\N	\N
+\.
+
+
+--
+-- Data for Name: protocols; Type: TABLE DATA; Schema: public; Owner: mox
+--
+
+COPY public.protocols (id, name, created_at) FROM stdin;
+3ec785b1-7726-4f8f-aede-9e03569e5536	ping	2026-04-24 13:50:28.021738-05
+\.
+
+
+--
+-- Data for Name: devices_protocols; Type: TABLE DATA; Schema: public; Owner: mox
+--
+
+COPY public.devices_protocols (device_id, protocol_id, enabled, assigned_at, port, polling_rate, encryption, vault_reference) FROM stdin;
+8e5b95b1-9461-41e4-8e5b-ce69f042f1d8	3ec785b1-7726-4f8f-aede-9e03569e5536	t	2026-03-06 12:02:04.860605-06	0	00:00:05	\N	\N
+a86d12ef-6aff-4f37-8b66-bfaaf7553fbb	3ec785b1-7726-4f8f-aede-9e03569e5536	t	2026-03-08 20:07:34.325486-05	0	00:00:05	\N	\N
+baa8df49-c984-47bb-9b31-d85e51da356a	3ec785b1-7726-4f8f-aede-9e03569e5536	t	2026-03-04 21:01:22.748966-06	0	00:00:05	\N	\N
+ade17d9a-3081-4ae4-8ba5-f8253979bfaf	3ec785b1-7726-4f8f-aede-9e03569e5536	t	2026-03-04 20:14:58.050846-06	0	00:00:05	\N	\N
+01ce0004-f164-4092-af15-197e30537f31	3ec785b1-7726-4f8f-aede-9e03569e5536	t	2026-03-09 13:46:38.870025-05	0	00:00:05	\N	\N
+\.
+
+
+--
+-- Data for Name: thresholds; Type: TABLE DATA; Schema: public; Owner: mox
+--
+
+COPY public.thresholds (id, device_id, device_type, metric, warning_value, critical_value, direction, created_at, modified_at) FROM stdin;
+a636bf9b-0f9d-4174-94ac-74fc75e13c01	\N	Mobile	packet_loss	0.01	0.05	above	2026-03-09 18:47:59.90707-05	2026-03-09 18:47:59.90707-05
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: mox
+--
+
+COPY public.users (id, first_name, last_name, role, job_title, email, phone_number, password_hash, created_at, last_login, on_call) FROM stdin;
+8e204484-3ce1-4ab8-9048-3409a3c3acf3	Scotty	Loveless	administrator	Senior IT Infrastructure Engineer	sloveless@ibml.com	205-907-2302	$2a$10$WifAvhO.ckwNBthBl03SM.YV2IAjSgGwY1Ebh1MrySX9FT1XlBZC6	2026-04-06 20:49:26.230222-05	2026-04-09 08:46:16.742322-05	f
+\.
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict 2LbMtL7kBLzkY04svCwMYYT5Xq7RicMavrIGgJhrIswyvYLbTSKPoeMdCNmFQ4a
+
