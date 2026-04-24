@@ -9,9 +9,9 @@ import (
 )
 
 type NinjaAlerts struct {
-	UID             string `json:"uid,omitzero"`
-	DeviceID        int    `json:"deviceId,omitzero"`
-	DeviceName      string
+	UID             string  `json:"uid,omitzero"`
+	DeviceID        int     `json:"deviceId,omitzero"`
+	DeviceName      string  `json:"device_name"`
 	Message         string  `json:"message,omitzero"`
 	CreateTime      float64 `json:"createTime,omitzero"`
 	UpdateTime      float64 `json:"updateTime,omitzero"`
