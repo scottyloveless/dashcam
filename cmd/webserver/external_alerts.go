@@ -50,7 +50,7 @@ func (app *application) handleExternalAlerts(w http.ResponseWriter, r *http.Requ
 		Alerts: rows,
 	}
 
-	if err := app.templates["external_alerts_partial"].Execute(w, data); err != nil {
+	if err := app.templates["externalAlertsPartial"].Execute(w, data); err != nil {
 		app.logger.Error("render external alerts failed", "err", err)
 	}
 }

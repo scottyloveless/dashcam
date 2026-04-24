@@ -1,6 +1,5 @@
 -- name: WriteAlert :exec
 INSERT INTO alerts (
-    id,
     last_occurrence,
     device_id,
     alert_metric,
@@ -8,16 +7,15 @@ INSERT INTO alerts (
     severity,
     display_message
 ) VALUES (
-    $1,
     NOW(),
+    $1,
     $2,
     $3,
-    $4,
-    $5,
+    $4::severity_enum,
     (
         SELECT
             COALESCE(nickname, hostname, 'unknown-device')
-            || ' — ' || $3::text || ' ' || $4::text
+            || ' — ' || $2::text || ' ' || ($4::severity_enum)::text
         FROM devices
         WHERE id = $1
     )

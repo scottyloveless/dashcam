@@ -246,7 +246,6 @@ func (q *Queries) UpdateAlertLastOccurrence(ctx context.Context, arg UpdateAlert
 
 const writeAlert = `-- name: WriteAlert :exec
 INSERT INTO alerts (
-    id,
     last_occurrence,
     device_id,
     alert_metric,
@@ -254,16 +253,15 @@ INSERT INTO alerts (
     severity,
     display_message
 ) VALUES (
-    $1,
     NOW(),
+    $1,
     $2,
     $3,
-    $4,
-    $5,
+    $4::severity_enum,
     (
         SELECT
             COALESCE(nickname, hostname, 'unknown-device')
-            || ' — ' || $3::text || ' ' || $4::text
+            || ' — ' || $2::text || ' ' || ($4::severity_enum)::text
         FROM devices
         WHERE id = $1
     )
@@ -271,20 +269,18 @@ INSERT INTO alerts (
 `
 
 type WriteAlertParams struct {
-	ID          pgtype.UUID
 	DeviceID    pgtype.UUID
 	AlertMetric string
 	ThresholdID pgtype.UUID
-	Severity    SeverityEnum
+	Column4     SeverityEnum
 }
 
 func (q *Queries) WriteAlert(ctx context.Context, arg WriteAlertParams) error {
 	_, err := q.db.Exec(ctx, writeAlert,
-		arg.ID,
 		arg.DeviceID,
 		arg.AlertMetric,
 		arg.ThresholdID,
-		arg.Severity,
+		arg.Column4,
 	)
 	return err
 }

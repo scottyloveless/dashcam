@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/scottyloveless/dashcam/internal/database"
@@ -36,14 +35,10 @@ func (app *application) evaluateAndAlert(ctx context.Context, trigger Trigger, m
 			alert, err := app.queries.CheckAlert(ctx, checkAlertParams)
 			if err == pgx.ErrNoRows {
 				alertParams := database.WriteAlertParams{
-					ID: pgtype.UUID{
-						Bytes: uuid.New(),
-						Valid: true,
-					},
 					DeviceID:    trigger.Trigger.DeviceID,
 					AlertMetric: metricname,
 					ThresholdID: activeThresholds.ID,
-					Severity:    *thresh,
+					Column4:     *thresh,
 				}
 				err = app.queries.WriteAlert(ctx, alertParams)
 				if err != nil {
