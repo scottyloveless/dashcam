@@ -26,6 +26,7 @@ SELECT
     threshold_id,
     severity,
     state,
+    display_message,
     notes
 FROM alerts
 WHERE
@@ -53,6 +54,7 @@ type CheckAlertRow struct {
 	ThresholdID    pgtype.UUID
 	Severity       SeverityEnum
 	State          StateEnum
+	DisplayMessage string
 	Notes          pgtype.Text
 }
 
@@ -73,6 +75,7 @@ func (q *Queries) CheckAlert(ctx context.Context, arg CheckAlertParams) (CheckAl
 		&i.ThresholdID,
 		&i.Severity,
 		&i.State,
+		&i.DisplayMessage,
 		&i.Notes,
 	)
 	return i, err
@@ -99,7 +102,8 @@ SELECT
     alerts.severity,
     alerts.created_at,
     alerts.last_occurrence,
-    alerts.id
+    alerts.id,
+    alerts.display_message
 FROM alerts
 INNER JOIN devices
     ON alerts.device_id = devices.id
@@ -120,6 +124,7 @@ type GetAlertsRow struct {
 	CreatedAt      pgtype.Timestamptz
 	LastOccurrence pgtype.Timestamptz
 	ID             pgtype.UUID
+	DisplayMessage string
 }
 
 func (q *Queries) GetAlerts(ctx context.Context) ([]GetAlertsRow, error) {
@@ -139,6 +144,77 @@ func (q *Queries) GetAlerts(ctx context.Context) ([]GetAlertsRow, error) {
 			&i.CreatedAt,
 			&i.LastOccurrence,
 			&i.ID,
+			&i.DisplayMessage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listOpenExternalAlerts = `-- name: ListOpenExternalAlerts :many
+SELECT
+    id,
+    source,
+    source_ref,
+    external_device_name,
+    alert_metric,
+    severity,
+    state,
+    display_message,
+    created_at,
+    last_occurrence,
+    ack_at
+FROM alerts
+WHERE
+    source != 'internal'
+    AND state IN ('open', 'acknowledged')
+ORDER BY
+    CASE severity WHEN 'critical' THEN 0 ELSE 1 END,
+    CASE state WHEN 'open' THEN 0 ELSE 1 END,
+    last_occurrence DESC NULLS LAST
+LIMIT 50
+`
+
+type ListOpenExternalAlertsRow struct {
+	ID                 pgtype.UUID
+	Source             string
+	SourceRef          pgtype.Text
+	ExternalDeviceName pgtype.Text
+	AlertMetric        string
+	Severity           SeverityEnum
+	State              StateEnum
+	DisplayMessage     string
+	CreatedAt          pgtype.Timestamptz
+	LastOccurrence     pgtype.Timestamptz
+	AckAt              pgtype.Timestamptz
+}
+
+func (q *Queries) ListOpenExternalAlerts(ctx context.Context) ([]ListOpenExternalAlertsRow, error) {
+	rows, err := q.db.Query(ctx, listOpenExternalAlerts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListOpenExternalAlertsRow
+	for rows.Next() {
+		var i ListOpenExternalAlertsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Source,
+			&i.SourceRef,
+			&i.ExternalDeviceName,
+			&i.AlertMetric,
+			&i.Severity,
+			&i.State,
+			&i.DisplayMessage,
+			&i.CreatedAt,
+			&i.LastOccurrence,
+			&i.AckAt,
 		); err != nil {
 			return nil, err
 		}
@@ -175,14 +251,22 @@ INSERT INTO alerts (
     device_id,
     alert_metric,
     threshold_id,
-    severity
+    severity,
+    display_message
 ) VALUES (
     $1,
     NOW(),
     $2,
     $3,
     $4,
-    $5
+    $5,
+    (
+        SELECT
+            COALESCE(nickname, hostname, 'unknown-device')
+            || ' — ' || $3::text || ' ' || $4::text
+        FROM devices
+        WHERE id = $1
+    )
 )
 `
 

@@ -5,14 +5,22 @@ INSERT INTO alerts (
     device_id,
     alert_metric,
     threshold_id,
-    severity
+    severity,
+    display_message
 ) VALUES (
     $1,
     NOW(),
     $2,
     $3,
     $4,
-    $5
+    $5,
+    (
+        SELECT
+            COALESCE(nickname, hostname, 'unknown-device')
+            || ' — ' || $3::text || ' ' || $4::text
+        FROM devices
+        WHERE id = $1
+    )
 );
 
 -- name: CheckAlert :one
@@ -30,6 +38,7 @@ SELECT
     threshold_id,
     severity,
     state,
+    display_message,
     notes
 FROM alerts
 WHERE
@@ -52,7 +61,8 @@ SELECT
     alerts.severity,
     alerts.created_at,
     alerts.last_occurrence,
-    alerts.id
+    alerts.id,
+    alerts.display_message
 FROM alerts
 INNER JOIN devices
     ON alerts.device_id = devices.id
@@ -70,3 +80,26 @@ SET
     state = 'cleared',
     cleared_at = NOW()
 WHERE id = $1;
+
+-- name: ListOpenExternalAlerts :many
+SELECT
+    id,
+    source,
+    source_ref,
+    external_device_name,
+    alert_metric,
+    severity,
+    state,
+    display_message,
+    created_at,
+    last_occurrence,
+    ack_at
+FROM alerts
+WHERE
+    source != 'internal'
+    AND state IN ('open', 'acknowledged')
+ORDER BY
+    CASE severity WHEN 'critical' THEN 0 ELSE 1 END,
+    CASE state WHEN 'open' THEN 0 ELSE 1 END,
+    last_occurrence DESC NULLS LAST
+LIMIT 50;

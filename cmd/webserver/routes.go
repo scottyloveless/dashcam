@@ -17,6 +17,6 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /alerts_partial", app.requireAuth(http.HandlerFunc(app.alertsPartialHandler)))
 	mux.Handle("GET /device/{id}", app.requireAuth(http.HandlerFunc(app.devicePageHandler)))
 	mux.Handle("POST /logout", app.requireAuth(http.HandlerFunc(app.logoutHandler)))
-
+	mux.Handle("GET /partials/external-alerts", app.requireAuth(http.HandlerFunc(app.handleExternalAlerts)))
 	return mux
 }

@@ -1,0 +1,21 @@
+<div class="external-alerts-panel">
+    <div class="external-alerts-header">
+        <h2>External Alerts</h2>
+        <span class="external-alerts-count">{{ .Count }}</span>
+    </div>
+    <div class="external-alerts-list">
+        {{ if not .Alerts }}
+            <div class="external-alerts-empty">No external alerts</div>
+        {{ else }}
+            {{ range .Alerts }}
+                <div class="external-alert external-alert--{{ .Severity }} external-alert--{{ .State }}">
+                    <span class="external-alert__severity-dot" aria-label="{{ .Severity }}"></span>
+                    <span class="external-alert__source source-{{ .Source }}">{{ .Source }}</span>
+                    <span class="external-alert__device">{{ .DeviceName }}</span>
+                    <span class="external-alert__message">{{ .Message }}</span>
+                    <span class="external-alert__time">{{ .RelativeTime }}</span>
+                </div>
+            {{ end }}
+        {{ end }}
+    </div>
+</div>
