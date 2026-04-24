@@ -1,7 +1,6 @@
 package ninja
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"strconv"
@@ -11,7 +10,7 @@ import (
 type NinjaAlerts struct {
 	UID             string  `json:"uid,omitzero"`
 	DeviceID        int     `json:"deviceId,omitzero"`
-	DeviceName      string  `json:"device_name"`
+	DeviceName      string  `json:"device_name,omitzero"`
 	Message         string  `json:"message,omitzero"`
 	CreateTime      float64 `json:"createTime,omitzero"`
 	UpdateTime      float64 `json:"updateTime,omitzero"`
@@ -102,11 +101,6 @@ type NinjaDevice struct {
 }
 
 func (c *Client) GetAlerts() ([]NinjaAlerts, error) {
-	c, err := NewClient(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
 	resp, err := c.HTTPClient.Get(c.BaseURL + "/v2/alerts")
 	if err != nil {
 		return nil, err
