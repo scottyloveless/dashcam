@@ -100,45 +100,52 @@ type NinjaDevice struct {
 	DeviceType       string `json:"deviceType,omitzero"`
 }
 
-func (c *Client) GetAlerts() ([]NinjaAlerts, error) {
+func FloatToTime(f float64) time.Time {
+	if f == 0 {
+		return time.Now()
+	}
+	return time.Unix(int64(f), 0)
+}
+
+func (c *Client) GetAlerts() ([]NinjaAlerts, []byte, error) {
 	resp, err := c.HTTPClient.Get(c.BaseURL + "/v2/alerts")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var alerts []NinjaAlerts
 
 	err = json.Unmarshal(data, &alerts)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	for i := range alerts {
 		resp, err := c.HTTPClient.Get(c.BaseURL + "/v2/device/" + strconv.Itoa(alerts[i].DeviceID))
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		var device NinjaDevice
 
 		err = json.Unmarshal(data, &device)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		alert := &alerts[i]
 		alert.DeviceName = device.DNSName
 	}
 
-	return alerts, nil
+	return alerts, nil, nil
 }

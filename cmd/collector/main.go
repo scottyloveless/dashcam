@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/scottyloveless/dashcam/internal/database"
@@ -128,26 +129,40 @@ func main() {
 		}
 	}()
 
-	ninjaTicker := time.NewTicker(5 * time.Second)
+	ninjaTicker := time.NewTicker(10 * time.Second)
 	defer ninjaTicker.Stop()
 
 	ninjaClient, err := ninja.NewClient(ctx)
 	if err != nil {
 		logger.Error(err.Error())
-		time.Sleep(5 * time.Second)
+		time.Sleep(10 * time.Second)
 		return
 	}
 
 	go func() {
 		for range ninjaTicker.C {
-			ninjaAlerts, err := ninjaClient.GetAlerts()
+			ninjaAlerts, rawData, err := ninjaClient.GetAlerts()
 			if err != nil {
 				logger.Error(err.Error())
 				continue
 			}
 
 			for _, alert := range ninjaAlerts {
-				logger.Info(alert.DeviceName + ": " + alert.Message)
+				err = app.queries.UpsertExternalAlert(ctx, database.UpsertExternalAlertParams{
+					CreatedAt:          pgtype.Timestamptz{Time: ninja.FloatToTime(alert.CreateTime)},
+					LastOccurrence:     pgtype.Timestamptz{Time: ninja.FloatToTime(alert.UpdateTime)},
+					Source:             "ninja",
+					SourceRef:          pgtype.Text{String: alert.UID},
+					ExternalDeviceName: pgtype.Text{String: alert.DeviceName},
+					AlertMetric:        alert.SourceType,
+					Severity:           "",
+					DisplayMessage:     alert.DeviceName, // TODO: need to make this match current metric display message
+					ExternalRawJson:    rawData,
+				})
+				if err != nil {
+					logger.Error(err.Error())
+					continue
+				}
 			}
 		}
 	}()

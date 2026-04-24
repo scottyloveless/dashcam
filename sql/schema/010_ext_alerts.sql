@@ -2,7 +2,8 @@
 ALTER TABLE alerts
 ADD COLUMN source TEXT NOT NULL DEFAULT 'internal',
 ADD COLUMN source_ref TEXT,
-ADD COLUMN external_device_name TEXT;
+ADD COLUMN external_device_name TEXT,
+ADD COLUMN external_raw_json JSONB;
 
 ALTER TABLE alerts
 ALTER COLUMN device_id DROP NOT NULL,
@@ -41,4 +42,5 @@ ALTER COLUMN device_id SET NOT NULL;
 ALTER TABLE alerts
 DROP COLUMN external_device_name,
 DROP COLUMN source_ref,
-DROP COLUMN source;
+DROP COLUMN source,
+DROP COLUMN external_raw_json;
