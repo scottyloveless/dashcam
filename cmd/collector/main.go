@@ -120,7 +120,6 @@ func main() {
 				continue
 			}
 			for _, alert := range alerts {
-				app.logger.Info(alert.Nickname)
 				app.watchdog(alert, ctx)
 			}
 

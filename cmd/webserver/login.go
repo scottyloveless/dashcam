@@ -11,25 +11,20 @@ import (
 )
 
 func (app *application) loginPostHandler(w http.ResponseWriter, r *http.Request) {
-	app.logger.Info("handler hit")
-
 	email := r.FormValue("email")
 	password := r.FormValue("password")
-	app.logger.Info("form values", "email", email)
 
 	user, err := app.queries.GetUserByEmail(r.Context(), email)
 	if err != nil {
 		app.logger.Error(err.Error())
 		return
 	}
-	app.logger.Info("user found")
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
 		app.logger.Error(err.Error())
 		http.Redirect(w, r, "/login?error=invalid+email+or+password", http.StatusSeeOther)
 		return
 	}
-	app.logger.Info("bcrypt passed")
 
 	tokenBytes := make([]byte, 32)
 	_, err = rand.Read(tokenBytes)
@@ -60,9 +55,7 @@ func (app *application) loginPostHandler(w http.ResponseWriter, r *http.Request)
 		Path:     "/",
 		MaxAge:   3600,
 	}
-	app.logger.Info("about to set cookie")
 	http.SetCookie(w, &cookie)
-	app.logger.Info("cookie set")
 
 	if err = app.queries.UpdateLastLogin(r.Context(), user.ID); err != nil {
 		app.logger.Error(err.Error())
