@@ -1,3 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+
+
 /* Tokyo Night Moon palette */
 :root {
     --bg:           #222436;
@@ -20,6 +24,8 @@
     --severity-critical: #ff757f;      /* red */
     --severity-warning: #ffc777;       /* yellow */
     --severity-acknowledged: #c099ff;  /* purple */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrainsMono Nerd Font', 'JetBrains Mono', monospace;
 }
 
 html {
@@ -28,7 +34,8 @@ html {
 }
 
 body {
-    font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace;
+    /* font-family: "JetBrains Mono Nerd Font", ui-monospace, monospace; */
+    font-family: var(--font-sans);
     margin: 0;
     padding: 10px;
 }
@@ -71,6 +78,9 @@ h4 {
     background-color: var(--bg-dark);
 }
 
+.device-name, .metric-value, .timestamp, code, pre {
+    font-family: var(--font-mono);
+}
 /* Device list inside each location column */
 .device-grid {
     display: grid;
@@ -238,12 +248,12 @@ h4 {
 
 /* External alerts panel */
 .external-alerts-panel {
-    background: var(--bg-secondary);
+    background: var(--bg-dark);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 1rem;
     margin-top: 1.5rem;
-    font-family: 'JetBrainsMono Nerd Font', monospace;
+    font-family: var(--font-sans);
 }
 
 .external-alerts-header {
@@ -257,16 +267,16 @@ h4 {
 
 .external-alerts-header h2 {
     margin: 0;
-    font-size: 1rem;
-    color: var(--fg-primary);
+    font-size: 14px;
+    color: var(--cyan);
 }
 
 .external-alerts-count {
-    background: var(--bg-tertiary);
-    color: var(--fg-secondary);
+    background: var(--bg-highlight);
+    color: var(--fg);
     padding: 0.125rem 0.5rem;
     border-radius: 10px;
-    font-size: 0.8rem;
+    font-size: 11px;
 }
 
 .external-alerts-list {
@@ -278,7 +288,7 @@ h4 {
 }
 
 .external-alerts-empty {
-    color: var(--fg-muted);
+    color: var(--comment);
     padding: 1rem;
     text-align: center;
     font-style: italic;
@@ -291,10 +301,10 @@ h4 {
     align-items: center;
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
-    background: var(--bg-primary);
+    background: var(--bg);
     border-left: 3px solid transparent;
     border-radius: 4px;
-    font-size: 0.875rem;
+    font-size: 12px;
 }
 
 /* Severity left-border + dot colors */
@@ -329,35 +339,38 @@ h4 {
 }
 
 .external-alert__source {
-    font-size: 0.7rem;
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     padding: 0.125rem 0.5rem;
     border-radius: 3px;
     letter-spacing: 0.05em;
+    font-family: var(--font-mono);
 }
 
 /* Per-source badge colors — easy to add more later */
 .external-alert__source.source-ninja {
-    background: rgba(100, 200, 255, 0.15);
-    color: #64c8ff;
+    background: rgba(134, 225, 252, 0.15);
+    color: var(--cyan);
 }
 /* Future: .source-m365, .source-datadog, etc. */
 
 .external-alert__device {
-    font-weight: 500;
-    color: var(--fg-primary);
+    font-weight: 600;
+    color: var(--orange);
+    font-family: var(--font-mono);
 }
 
 .external-alert__message {
-    color: var(--fg-secondary);
+    color: var(--fg);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .external-alert__time {
-    color: var(--fg-muted);
-    font-size: 0.8rem;
+    color: var(--comment);
+    font-size: 11px;
     white-space: nowrap;
+    font-family: var(--font-mono);
 }
