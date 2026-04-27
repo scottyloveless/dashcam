@@ -26,6 +26,9 @@
     --severity-acknowledged: #c099ff;  /* purple */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrainsMono Nerd Font', 'JetBrains Mono', monospace;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 
 html {
@@ -76,6 +79,7 @@ h4 {
     border-radius: 8px;
     font-size: 12px;
     background-color: var(--bg-dark);
+    box-shadow: var(--shadow-md);
 }
 
 .device-name, .metric-value, .timestamp, code, pre {
@@ -149,6 +153,7 @@ h4 {
     border-radius: 8px;
     padding: 40px;
     width: 320px;
+    box-shadow: var(--shadow-lg);
 }
 
 .login-title {
@@ -254,6 +259,7 @@ h4 {
     padding: 1rem;
     margin-top: 1.5rem;
     font-family: var(--font-sans);
+    box-shadow: var(--shadow-md);
 }
 
 .external-alerts-header {
